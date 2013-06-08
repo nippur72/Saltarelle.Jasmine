@@ -2,7 +2,7 @@
 	////////////////////////////////////////////////////////////////////////////////
 	// JasmineTests
 	var $JasmineTests = function() {
-		JasmineSuite.call(this);
+		ss.shallowCopy(null, this);
 	};
 	$JasmineTests.prototype = {
 		SpecRunner1: function() {
@@ -489,5 +489,5 @@
 			// });
 		}
 	};
-	ss.registerClass(global, 'JasmineTests', $JasmineTests, JasmineSuite);
+	ss.registerClass(global, 'JasmineTests', $JasmineTests, Object);
 })();

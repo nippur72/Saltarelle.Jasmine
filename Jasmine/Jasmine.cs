@@ -60,9 +60,13 @@ namespace Jasmine
       public void Call(params object[] args) {}
    }
 
-   [IgnoreNamespace]   
+   [IgnoreNamespace]
+   [Imported]
+   [ScriptName("Object")]     
    public class JasmineSuite
    {
+      [InlineCode("null")] public JasmineSuite() { }
+
       [InlineCode("describe({description},{specDefinitions})")]
       public static void describe(string description, Action specDefinitions) {}
 
