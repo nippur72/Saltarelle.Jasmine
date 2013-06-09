@@ -1,12 +1,12 @@
 # Saltarelle.Jasmine
 
 Saltarelle.Jasmine is the metadata library required to use the [Jasmine](http://pivotal.github.io/jasmine/) BDD testing 
-framework with the C# Saltarelle compiler.
+framework with the [C# Saltarelle compiler](http://www.saltarelle-compiler.com/).
 
-# Setting up the C# project
+## Setting up the C# project
 
 To be able to write tests with Saltarelle.Jasmine, in your C# project you need to add a reference 
-to Saltarelle.Jasmine.dll contained in this repo. 
+to `Saltarelle.Jasmine.dll` contained in this repo. 
 
 Then, in your .cs files add the following:
 
@@ -14,7 +14,7 @@ Then, in your .cs files add the following:
 using Jasmine;
 ```
 
-# Set up the runner page
+## Set up the runner page
 
 The easiest way to run a Javascript testing framework is to have a specific web page (called runner) that runs all your tests. 
 
@@ -28,12 +28,12 @@ and the command to run the tests. For example:
 <script>     
     new JasmineTests().SpecRunner(); // run tests contained in the class JasmineTests, SpecRunner() method
 </script>
-```HTML
+```
 
 please note that while in Javascript code and tests are on separate files, in Saltarelle there is only
-one script file containing both code and tests (in the above: `example.js`).
+one script file containing both code and tests (unless of course you have two separate projects for code and for testing).
 
-# How to write tests
+## How to write tests
 
 In Jasmine terminology tests are grouped under a test suite. To create a test suite, derive a class from `JasmineSuite` and implement
 a method containing your suite. For example:
@@ -64,7 +64,7 @@ public class JasmineTests : JasmineSuite
 }
 ```
 
-# Running the tests
+## Running the tests
 
 Simply run your application and browse to your runner page (SpecRunner.html), Jasmine will do the rest.
 
