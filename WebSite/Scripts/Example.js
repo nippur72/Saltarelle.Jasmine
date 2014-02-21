@@ -1,10 +1,15 @@
 ﻿(function() {
+	'use strict';
+	var $asm = {};
+	ss.initAssembly($asm, 'Example');
 	////////////////////////////////////////////////////////////////////////////////
 	// JasmineTests
 	var $JasmineTests = function() {
 		ss.shallowCopy(null, this);
 	};
-	$JasmineTests.prototype = {
+	$JasmineTests.__typeName = 'JasmineTests';
+	global.JasmineTests = $JasmineTests;
+	ss.initClass($JasmineTests, $asm, {
 		SpecRunner1: function() {
 			//
 			//      describe("generic",()=>
@@ -36,7 +41,7 @@
 					expect(a).toBe(true);
 				}));
 			}));
-			describe('The \'toBe\' matcher compares with ===', ss.mkdel(this, function() {
+			describe("The 'toBe' matcher compares with ===", ss.mkdel(this, function() {
 				it('and has a positive case ', ss.mkdel(this, function() {
 					expect(true).toBe(true);
 				}));
@@ -45,13 +50,13 @@
 				}));
 			}));
 			describe('Included matchers:', ss.mkdel(this, function() {
-				it('The \'toBe\' matcher compares with ===', ss.mkdel(this, function() {
+				it("The 'toBe' matcher compares with ===", ss.mkdel(this, function() {
 					var a1 = 12;
 					var b = a1;
 					expect(a1).toBe(b);
 					expect(a1).not.toBe(null);
 				}));
-				describe('The \'toEqual\' matcher', ss.mkdel(this, function() {
+				describe("The 'toEqual' matcher", ss.mkdel(this, function() {
 					it('works for simple literals and variables', ss.mkdel(this, function() {
 						var a2 = 12;
 						expect(a2).toEqual(12);
@@ -62,13 +67,13 @@
 						expect(foo).toEqual(bar);
 					}));
 				}));
-				it('The \'toMatch\' matcher is for regular expressions', ss.mkdel(this, function() {
+				it("The 'toMatch' matcher is for regular expressions", ss.mkdel(this, function() {
 					var message = 'foo bar baz';
 					//expect(message).toMatch(/bar/);       // regex literal expressions do not exist in C#
 					expect(message).toMatch('bar');
 					//expect(message).not.toMatch(/quux/);  // regex literal expressions do not exist in C#
 				}));
-				it('The \'toBeDefined\' matcher compares against `undefined`', ss.mkdel(this, function() {
+				it("The 'toBeDefined' matcher compares against `undefined`", ss.mkdel(this, function() {
 					var a3 = { foo: 'foo' };
 					expect(a3.foo).toBeDefined();
 					expect(a3.bar).not.toBeDefined();
@@ -79,49 +84,49 @@
 					expect(a4.foo).not.toBeUndefined();
 					expect(a4.bar).toBeUndefined();
 				}));
-				it('The \'toBeNull\' matcher compares against null', ss.mkdel(this, function() {
+				it("The 'toBeNull' matcher compares against null", ss.mkdel(this, function() {
 					var a5 = null;
 					var foo1 = 'foo';
 					expect(null).toBeNull();
 					expect(a5).toBeNull();
 					expect(foo1).not.toBeNull();
 				}));
-				it('The \'toBeTruthy\' matcher is for boolean casting testing', ss.mkdel(this, function() {
+				it("The 'toBeTruthy' matcher is for boolean casting testing", ss.mkdel(this, function() {
 					var a6 = null;
 					var foo2 = 'foo';
 					expect(foo2).toBeTruthy();
 					expect(a6).not.toBeTruthy();
 				}));
-				it('The \'toBeFalsy\' matcher is for boolean casting testing', ss.mkdel(this, function() {
+				it("The 'toBeFalsy' matcher is for boolean casting testing", ss.mkdel(this, function() {
 					var a7 = null;
 					var foo3 = 'foo';
 					expect(a7).toBeFalsy();
 					expect(foo3).not.toBeFalsy();
 				}));
-				it('The \'toContain\' matcher is for finding an item in an Array', ss.mkdel(this, function() {
+				it("The 'toContain' matcher is for finding an item in an Array", ss.mkdel(this, function() {
 					var a8 = ['foo', 'bar', 'baz'];
 					expect(a8).toContain('bar');
 					expect(a8).not.toContain('quux');
 				}));
-				it('The \'toBeLessThan\' matcher is for mathematical comparisons', ss.mkdel(this, function() {
+				it("The 'toBeLessThan' matcher is for mathematical comparisons", ss.mkdel(this, function() {
 					var pi = 3.1415926;
 					var e = 2.78;
 					expect(e).toBeLessThan(pi);
 					expect(pi).not.toBeLessThan(e);
 				}));
-				it('The \'toBeGreaterThan\' is for mathematical comparisons', ss.mkdel(this, function() {
+				it("The 'toBeGreaterThan' is for mathematical comparisons", ss.mkdel(this, function() {
 					var pi1 = 3.1415926;
 					var e1 = 2.78;
 					expect(pi1).toBeGreaterThan(e1);
 					expect(e1).not.toBeGreaterThan(pi1);
 				}));
-				it('The \'toBeCloseTo\' matcher is for precision math comparison', ss.mkdel(this, function() {
+				it("The 'toBeCloseTo' matcher is for precision math comparison", ss.mkdel(this, function() {
 					var pi2 = 3.1415926;
 					var e2 = 2.78;
 					expect(pi2).not.toBeCloseTo(e2, 2);
 					expect(pi2).toBeCloseTo(e2, 0);
 				}));
-				it('The \'toThrow\' matcher is for testing if a function throws an exception', ss.mkdel(this, function() {
+				it("The 'toThrow' matcher is for testing if a function throws an exception", ss.mkdel(this, function() {
 					var foo4 = function() {
 						return 3;
 					};
@@ -488,6 +493,5 @@
 			// });
 			// });
 		}
-	};
-	ss.registerClass(global, 'JasmineTests', $JasmineTests, Object);
+	}, Object);
 })();
