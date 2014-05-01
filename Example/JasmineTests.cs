@@ -670,20 +670,22 @@ describe("Manually ticking the Jasmine Mock Clock", ()=> {
  Jasmine also has support for running specs that require testing asynchronous operations.
 
  */
- /* TODO async
+  
 describe("Asynchronous specs", ()=> {
-  var value, flag;
+  int value=0;
+  bool flag=false;
 
   it("should support async execution of test preparation and exepectations", ()=> {
 
     /**
      Specs are written by defining a set of blocks with calls to `runs`, which usually finish with an asynchronous call.
-     /
+    **/
+
     runs(()=> {
       flag = false;
       value = 0;
 
-      setTimeout(()=> {
+      Window.SetTimeout(()=> {
         flag = true;
       }, 500);
     });
@@ -692,7 +694,8 @@ describe("Asynchronous specs", ()=> {
      The `waitsFor` block takes a latch function, a failure message, and a timeout.
 
      The latch function polls until it returns true or the timeout expires, whichever comes first. If the timeout expires, the spec fails with the error message.
-     /
+    */
+
     waitsFor(()=> {
       value++;
       return flag;
@@ -700,14 +703,14 @@ describe("Asynchronous specs", ()=> {
 
     /**
      Once the asynchronous conditions have been met, another `runs` block defines final test behavior. This is usually expectations based on state after the asynch call returns.
-     /
+    */
+
     runs(()=> {
       expect(value).toBeGreaterThan(0);
     });
+
   });
 });
-
-*/
 
    }
 }

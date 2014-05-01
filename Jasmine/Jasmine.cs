@@ -99,7 +99,12 @@ namespace Jasmine
 
       // clock mock
 
-      // async support: runs, waits, waitsFor
+      // async support
+      [InlineCode("runs({func})")]
+      public static void runs(Action func) {}
+
+      [InlineCode("waitsFor({func},{message},{timeout})")]
+      public static void waitsFor(Func<bool> func, string message, int timeout) { }
    }
 }
 
