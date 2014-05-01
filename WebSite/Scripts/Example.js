@@ -5,7 +5,7 @@
 	////////////////////////////////////////////////////////////////////////////////
 	// JasmineTests
 	var $JasmineTests = function() {
-		ss.shallowCopy(null, this);
+		ss.shallowCopy({}, this);
 	};
 	$JasmineTests.__typeName = 'JasmineTests';
 	global.JasmineTests = $JasmineTests;

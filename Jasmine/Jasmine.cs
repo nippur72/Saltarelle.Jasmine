@@ -65,7 +65,7 @@ namespace Jasmine
    [ScriptName("Object")]     
    public class JasmineSuite
    {
-      [InlineCode("null")] public JasmineSuite() { }
+      [InlineCode("{}")] public JasmineSuite() { }
 
       [InlineCode("describe({description},{specDefinitions})")]
       public static void describe(string description, Action specDefinitions) {}
