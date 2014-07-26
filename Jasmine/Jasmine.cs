@@ -103,8 +103,14 @@ namespace Jasmine
       [InlineCode("runs({func})")]
       public static void runs(Action func) {}
 
-      [InlineCode("waitsFor({func},{message},{timeout})")]
-      public static void waitsFor(Func<bool> func, string message, int timeout) { }
+      [InlineCode("waitsFor({func},{failure_message},{timeout})")]
+      public static void waitsFor(Func<bool> func, string failure_message, int timeout) { }
+
+      [InlineCode("waitsFor({func},'',{timeout})")]
+      public static void waitsFor(Func<bool> func, int timeout) { }
+
+      [InlineCode("waitsFor({func})")]
+      public static void waitsFor(Func<bool> func) { }
    }
 }
 
