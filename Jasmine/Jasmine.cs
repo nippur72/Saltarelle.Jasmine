@@ -157,6 +157,9 @@ namespace Jasmine
         [InlineCode("jasmine.createSpyObj({name},{args})")]
         public Spy createSpyObj(string name, string[] args) { return null; }
 
+        [InlineCode("jasmine.addMatchers({matcher})")]
+        public static void addMatcher(object matcher) { } //TODO: create a Matcher interface that is a function that return an object that has a compar node, which returns a result object 
+
         // clock mock
 
         // async support
