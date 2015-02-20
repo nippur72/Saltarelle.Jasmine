@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Serialization;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 [assembly: PreserveMemberCase]
 
@@ -16,6 +17,14 @@ namespace Jasmine
     [Imported]
     public class Matcher
     {
+        private Matcher(Env env, object actual, Env spec, bool isNot = false) { }
+
+        public Env env;
+        public object actual;
+        public Env spec;
+        public bool isNot = false;
+        public object message() { }
+
         public bool toBe(object expected) { return false; }
         public bool toEqual(object expected) { return false; }
         public bool toMatch(string expected) { return false; }
@@ -39,6 +48,7 @@ namespace Jasmine
         public Matcher not { get { return null; } }
 
         // any matcher
+        public IAny Any;
 
         // typeof matcher?
     }
@@ -54,13 +64,14 @@ namespace Jasmine
     {
         public string identity;
         public SpyCall mostRecentCall;
-        public SpyCall[] calls;
+        public Calls calls;
         public Spy andCallThrough() { return null; }
         public Spy andReturn(object o) { return null; }
         public Spy andCallFake<T>(Func<T> function) { return null; }
         [InlineCode("{this}({*args})")]
         public void Call(params object[] args) { }
 
+        [ScriptSkip]
         public static implicit operator Function(Spy spy)
         {
             return new Function();
@@ -113,7 +124,7 @@ namespace Jasmine
 
         [InlineCode("pending()")]
         public void pending() { }
-        
+
         [InlineCode("expect({o})")]
         public Matcher expect(object o) { return null; }
 
@@ -158,15 +169,12 @@ namespace Jasmine
 
         [InlineCode("spyOn({o},{methodname})")]
         public static Spy spyOn(object o, string methodname) { return null; }
-        
+
         [InlineCode("jasmine.createSpy({name})")]
         public Spy createSpy(string name) { return null; }
 
         [InlineCode("jasmine.createSpyObj({name},{args})")]
         public Spy createSpyObj(string name, string[] args) { return null; }
-
-        [InlineCode("jasmine.addMatchers({matcher})")]
-        public static void addMatcher(object matcher) { } //TODO: create a Matcher interface that is a function that return an object that has a compar node, which returns a result object 
 
         // clock mock
 
@@ -175,7 +183,7 @@ namespace Jasmine
         public static void runs(Action func) { }
 
         [InlineCode("waitsFor({func},{failure_message},{timeout})")]
-        public static void waitsFor(Func<bool> func, string failure_message, int timeout) { }
+        public static void waitsFor(Func<bool> func, string failureMessage, int timeout) { }
 
         [InlineCode("waitsFor({func},'',{timeout})")]
         public static void waitsFor(Func<bool> func, int timeout) { }
@@ -184,6 +192,7 @@ namespace Jasmine
         public static void waitsFor(Func<bool> func) { }
     }
 
+    [Imported]
     public class Clock
     {
         [InlineCode("install()")]
@@ -195,16 +204,480 @@ namespace Jasmine
         [InlineCode("tick({ms})")]
         public void tick(int ms) { }
     }
+    [Imported]
     public interface IAny
     {
+        object IAny(object exportedClass);
+
         bool jasmineMatches(object other);
         string jasmineToString();
     }
 
+    [Imported]
     public interface IObjectContaining
     {
+        object IObjectContaining(object sample);
+
         bool jasmineMatches(object other, object[] mismatchKeys, object[] mismatchValues);
         string jasmineToString();
+    }
+
+    [Imported]
+    public interface Block
+    {
+        object Block(Env env, SpecFunction func, Spec spec);
+
+        void execute(Action onComplete);
+    }
+
+    [Imported]
+    public interface WaitsBlock : Block
+    {
+        object WaitsBlock(Env env, int timeout, Spec spec);
+    }
+
+    [Imported]
+    public interface WaitsForBlock : Block
+    {
+        object WaitsBlock(Env env, int timeout, SpecFunction latchFunction, string message, Spec spec);
+    }
+
+    [Imported]
+    public sealed class Env
+    {
+        private Env() { }
+
+        public Func<Function, int, int> setTimeout;
+        public Action<int> clearTimeout;
+        public object setInterval;
+        public Action<int> clearInterval;
+        public int updateInterval;
+
+        public Spec currentSpec;
+
+        public Matcher matchersClass;
+
+        public object version()
+        {
+            return null;
+        }
+
+        public string versionString()
+        {
+            return null;
+        }
+        public int nextSpecId()
+        {
+            return 0;
+        }
+        public void addReporter(Reporter reporter) { }
+        public void execute() { }
+        public Suite describe(string description, Action specDefinitions)
+        {
+            return null;
+        }
+        public void beforeEach(Action beforeEachFunction){}
+        public void beforeAll(Action beforeAllFunction){}
+        public Runner currentRunner()
+        {
+            return null;
+        }
+        public void afterEach(Action afterEachFunction){}
+        public void afterAll(Action afterAllFunction){}
+        public XSuite xdescribe(string desc, Action specDefinitions)
+        {
+            return null;
+        }
+        public Spec it(string description, Action func)
+        {
+            return null;
+        }
+        public XSpec xit(string desc, Action func)
+        {
+            return null;
+        }
+        public bool compareRegExps_(Regex a, Regex b, string[] mismatchKeys, string[] mismatchValues)
+        {
+            return false;
+        }
+        public bool compareObjects_(object a, object b, string[] mismatchKeys, string[] mismatchValues)
+        {
+            return false;
+        }
+        public bool equals_(object a, object b, string[] mismatchKeys, string[] mismatchValues)
+        {
+            return false;
+        }
+        public bool contains_(object haystack, object needle)
+        {
+            return false;
+        }
+        public void addEqualityTester(Func<object, object, Env, string[], string[], bool> equalityTester) { }
+        public bool specFilter(Spec spec)
+        {
+            return false;
+        }
+    }
+
+    [Imported]
+    public interface FakeTimer
+    {
+        object FakeTimer();
+
+        Action reset();
+        Action tick(int millis);
+        Action runFunctionsWithinRange(int oldMillis, int nowMillis);
+        Action scheduleFunction(object timeoutKey, Action funcToCall, int millis, bool recurring);
+    }
+
+    [Imported]
+    public interface HtmlReporter
+    {
+        object HtmlReporter();
+    }
+
+    [Imported]
+    public interface HtmlSpecFilter
+    {
+        object HtmlSpecFilter();
+    }
+
+    [Imported]
+    public class Result
+    {
+        protected Result() {}
+        public string type;
+    }
+
+    [Imported]
+    public class NestedResults : Result
+    {
+        string description;
+
+        public int totalCount;
+        public int passedCount;
+        public int failedCount;
+
+        public bool skipped;
+
+        public void rollupCounts(NestedResults result) { }
+        public void log(object values) { }
+        public Result[] getItems()
+        {
+            return null;
+        }
+        public void addResult(Result result) { }
+
+        public bool passed()
+        {
+            return false;
+        }
+    }
+
+    [Imported]
+    public class MessageResult : Result
+    {
+        public object values;
+        public Trace trace;
+    }
+
+    [Imported]
+    public class ExpectationResult : Result
+    {
+        public string matcherName;
+
+        public bool passed()
+        {
+            return false;
+        }
+        public object expected;
+        public object actual;
+        public string message;
+        public Trace trace;
+    }
+
+    [Imported]
+    public class Trace
+    {
+        public string name;
+        public string message;
+        public object stack;
+    }
+
+    [Imported]
+    public interface PrettyPrinter
+    {
+        object PrettyPrinter();
+
+        void format(object value);
+        void iterateObject(object obj, Action<string, bool> fn);
+        void emitScalar(object value);
+        void emitString(string value);
+        void emitArray(object[] array);
+        void emitObject(object obj);
+        void append(object value);
+    }
+
+    [Imported]
+    public interface StringPrettyPrinter : PrettyPrinter
+    {
+    }
+
+    [Imported]
+    public class Queue
+    {
+
+        private Queue(object env){ }
+
+        public Env env;
+        public bool[] ensured;
+        public Block[] blocks;
+        public bool running;
+        public int index;
+        public int offset;
+        public bool abort;
+
+        public void addBefore(Block block, bool ensure = false) { }
+        public void add(object block, bool ensure = false) { }
+        public void insertNext(object block, bool ensure = false) { }
+        public void start(Action onComplete = null) { }
+        public bool isRunning()
+        {
+            return false;
+        }
+        public void next_() { }
+
+        public NestedResults results()
+        {
+            return null;
+        }
+    }
+
+    public class Reporter
+    {
+        public void reportRunnerStarting(Runner runner) { }
+        public void reportRunnerResults(Runner runner) { }
+        public void reportSuiteResults(Suite suite) { }
+        public void reportSpecStarting(Spec spec) { }
+        public void reportSpecResults(Spec spec) { }
+        public void log(string str) { }
+    }
+
+    public class MultiReporter : Reporter
+    {
+        public void addReporter(Reporter reporter) { }
+    }
+
+    public interface Runner
+    {
+        object Runner(Env env);
+
+        void execute();
+        void beforeEach(SpecFunction beforeEachFunction);
+        void afterEach(SpecFunction afterEachFunction);
+        void beforeAll(SpecFunction beforeAllFunction);
+        void afterAll(SpecFunction afterAllFunction);
+        void finishCallback();
+        void addSuite(Suite suite);
+        void add(Block block);
+        Spec[] specs();
+        Suite[] suites();
+        Suite[] topLevelSuites();
+        NestedResults results();
+    }
+
+    public delegate void SpecFunction(Spec spec = null);
+
+    public class SuiteOrSpec
+    {
+        public int id;
+        public Env env;
+        public string description;
+        public Queue queue;
+    }
+
+    public class Spec : SuiteOrSpec
+    {
+
+        private Spec(Env env, Suite suite, string description) { }
+
+        public Suite suite;
+
+        public SpecFunction[] afterCallbacks;
+        public Spy[] spies_;
+
+        public NestedResults results_;
+        public Matcher matchersClass;
+
+        public string getFullName()
+        {
+            return null;
+        }
+        public NestedResults results()
+        {
+            return null;
+        }
+        public object log(object arguments)
+        {
+            return null;
+        }
+        public Spec runs(SpecFunction func)
+        {
+            return null;
+        }
+        public void addToQueue(Block block) { }
+        public void addMatcherResult(Result result) { }
+        public object expect(object actual)
+        {
+            return null;
+        }
+        public Spec waits(int timeout)
+        {
+            return null;
+        }
+        public Spec waitsFor(SpecFunction latchFunction, string timeoutMessage = null, int timeout = 0)
+        {
+            return null;
+        }
+        public void fail(object e = null) { }
+        public Matcher getMatchersClass_()
+        {
+            return null;
+        }
+        public void addMatchers(object matchersPrototype) { }
+        public void finishCallback() { }
+        public void finish(Action onComplete = null) { }
+        public void after(SpecFunction doAfter) { }
+        public object execute(Action onComplete = null)
+        {
+            return null;
+        }
+        public void addBeforesAndAftersToQueue() { }
+        public void explodes() { }
+        public Spy spyOn(object obj, string methodName, bool ignoreMethodDoesntExist)
+        {
+            return null;
+        }
+        public void removeAllSpies() { }
+    }
+
+    public class XSpec
+    {
+        private XSpec() { }
+
+        public int id;
+        public void runs() { }
+    }
+
+    public class Suite : SuiteOrSpec
+    {
+
+        private Suite(Env env, string description, Action specDefinitions, Suite parentSuite) { }
+
+        public Suite parentSuite;
+
+        public string getFullName()
+        {
+            return null;
+        }
+        public void finish(Action onComplete = null) { }
+        public void beforeEach(SpecFunction beforeEachFunction) { }
+        public void afterEach(SpecFunction afterEachFunction) { }
+        public void beforeAll(SpecFunction beforeAllFunction) { }
+        public void afterAll(SpecFunction afterAllFunction) { }
+        public NestedResults results()
+        {
+            return null;
+        }
+        public void add(SuiteOrSpec suiteOrSpec) { }
+        public Spec[] specs()
+        {
+            return null;
+        }
+        public Suite[] suites()
+        {
+            return null;
+        }
+        public object[] children()
+        {
+            return null;
+        }
+        public void execute(Action onComplete = null) { }
+    }
+
+    public interface XSuite
+    {
+        void execute();
+    }
+
+    public interface SpyAnd
+    {
+        Spy callThrough();
+        void returnValue(object val);
+        Spy callFake(Function fn);
+        void throwError(string msg);
+        Spy stub();
+    }
+
+    public interface Calls
+    {
+        bool any();
+        int count();
+        object[] argsFor(int index);
+        object[] allArgs();
+        object all();
+        object mostRecent();
+        object first();
+        void reset();
+    }
+
+    public interface IUtil
+    {
+        object inherit(Function childClass, Function parentClass);
+        object formatException(object e);
+        string htmlEscape(string str);
+        object argsToArray(object args);
+        object extend(object destination, object source);
+    }
+    
+    public class JsApiReporter : Reporter
+    {
+
+        public bool started;
+        public bool finished;
+        public object result;
+        public object messages;
+
+        private JsApiReporter() { }
+
+        public Suite[] suites()
+        {
+            return null;
+        }
+        public object summarize_(SuiteOrSpec suiteOrSpec)
+        {
+            return null;
+        }
+        public object results()
+        {
+            return null;
+        }
+        public object resultsForSpec(object specId)
+        {
+            return null;
+        }
+        public object log(object str)
+        {
+            return null;
+        }
+        public object resultsForSpecs(object specIds)
+        {
+            return null;
+        }
+        public object summarizeResult_(object result)
+        {
+            return null;
+        }
     }
 }
 
@@ -215,6 +688,14 @@ public static class jasmine
     {
         return null;
     }
+
+    [InlineCode("jasmine.Spec()")]
+    public static Jasmine.Spec Spec()
+    {
+        return null;
+    }
+    
+    public static Jasmine.IUtil util;
 
     [InlineCode("jasmine.any({any})")]
     public static Jasmine.IAny any(object any)
@@ -234,6 +715,7 @@ public static class jasmine
         return null;
     }
 
+    [InlineCode("jasmine.createSpyObj({baseName}, {methodNames})")]
     public static dynamic createSpyObj(string baseName, string[] methodNames)
     {
         return null;
@@ -245,385 +727,30 @@ public static class jasmine
         return default(T);
     }
 
+    [InlineCode("jasmine.pp({value})")]
+    public static string pp(object value)
+    {
+        return null;
+    }
+
+    [InlineCode("jasmine.getEnv()")]
+    public static Jasmine.Env getEnv()
+    {
+        return null;
+    }
+
+    [InlineCode("jasmine.addMatchers({matcher})")]
+    public static void addMatcher(object matcher) { } //TODO: create a Matcher interface that is a function that return an object that has a compar node, which returns a result object 
+
+
     /*
-    TODO:
-    function pp(value: any): string;
-    function getEnv(): Env;
-    function addMatchers(matchers: any): Any;
-
-    interface Block {
-
-        new (env: Env, func: SpecFunction, spec: Spec): any;
-
-        execute(onComplete: () => void): void;
-    }
-
-    interface WaitsBlock extends Block {
-        new (env: Env, timeout: number, spec: Spec): any;
-    }
-
-    interface WaitsForBlock extends Block {
-        new (env: Env, timeout: number, latchFunction: SpecFunction, message: string, spec: Spec): any;
-    }
-
-    interface Env
-    {
-        setTimeout: any;
-            clearTimeout: void;
-            setInterval: any;
-            clearInterval: void;
-            updateInterval: number;
-
-            currentSpec: Spec;
-
-            matchersClass: Matchers;
-
-            version(): any;
-            versionString(): string;
-            nextSpecId(): number;
-            addReporter(reporter: Reporter): void;
-            execute(): void;
-            describe(description: string, specDefinitions: () => void): Suite;
-            // ddescribe(description: string, specDefinitions: () => void): Suite; Not a part of jasmine. Angular team adds these
-            beforeEach(beforeEachFunction: () => void): void;
-            beforeAll(beforeAllFunction: () => void): void;
-            currentRunner(): Runner;
-            afterEach(afterEachFunction: () => void): void;
-            afterAll(afterAllFunction: () => void): void;
-            xdescribe(desc: string, specDefinitions: () => void): XSuite;
-            it(description: string, func: () => void): Spec;
-            // iit(description: string, func: () => void): Spec; Not a part of jasmine. Angular team adds these
-            xit(desc: string, func: () => void): XSpec;
-            compareRegExps_(a: RegExp, b: RegExp, mismatchKeys: string[], mismatchValues: string[]): boolean;
-            compareObjects_(a: any, b: any, mismatchKeys: string[], mismatchValues: string[]): boolean;
-            equals_(a: any, b: any, mismatchKeys: string[], mismatchValues: string[]): boolean;
-            contains_(haystack: any, needle: any): boolean;
-            addEqualityTester(equalityTester: (a: any, b: any, env: Env, mismatchKeys: string[], mismatchValues: string[]) => boolean): void;
-            specFilter(spec: Spec): boolean;
-        }
-
-    interface FakeTimer
-    {
-
-        new (): any;
-
-            reset(): void;
-            tick(millis: number): void;
-            runFunctionsWithinRange(oldMillis: number, nowMillis: number): void;
-            scheduleFunction(timeoutKey: any, funcToCall: () => void, millis: number, recurring: boolean): void;
-        }
-
-    interface HtmlReporter
-    {
-        new (): any;
-        }
-
-    interface HtmlSpecFilter
-    {
-        new (): any;
-        }
-
-    interface Result
-    {
-        type: string;
-        }
-
-    interface NestedResults extends Result
-    {
-        description: string;
-
-        totalCount: number;
-        passedCount: number;
-        failedCount: number;
-
-        skipped: boolean;
-
-        rollupCounts(result: NestedResults): void;
-        log(values: any): void;
-        getItems(): Result[];
-        addResult(result: Result): void;
-        passed(): boolean;
-    }
-
-    interface MessageResult extends Result
-    {
-        values: any;
-        trace: Trace;
-    }
-
-    interface ExpectationResult extends Result
-    {
-        matcherName: string;
-        passed(): boolean;
-        expected: any;
-        actual: any;
-        message: string;
-        trace: Trace;
-    }
-
-    interface Trace
-    {
-        name: string;
-            message: string;
-            stack: any;
-        }
-
-    interface PrettyPrinter
-    {
-
-        new (): any;
-
-            format(value: any): void;
-            iterateObject(obj: any, fn: (property: string, isGetter: boolean) => void): void;
-            emitScalar(value: any): void;
-            emitString(value: string): void;
-            emitArray(array: any[]): void;
-            emitObject(obj: any): void;
-            append(value: any): void;
-        }
-
-    interface StringPrettyPrinter extends PrettyPrinter
-    {
-    }
-
-    interface Queue
-    {
-
-        new (env: any): any;
-
-            env: Env;
-            ensured: boolean[];
-            blocks: Block[];
-            running: boolean;
-            index: number;
-            offset: number;
-            abort: boolean;
-
-            addBefore(block: Block, ensure?: boolean): void;
-            add(block: any, ensure?: boolean): void;
-            insertNext(block: any, ensure?: boolean): void;
-            start(onComplete?: () => void): void;
-            isRunning(): boolean;
-            next_(): void;
-            results(): NestedResults;
-        }
-
-    interface Matchers
-    {
-
-        new (env: Env, actual: any, spec: Env, isNot?: boolean): any;
-
-            env: Env;
-            actual: any;
-            spec: Env;
-            isNot?: boolean;
-            message(): any;
-
-            toBe(expected: any): boolean;
-            toEqual(expected: any): boolean;
-            toMatch(expected: any): boolean;
-            toBeDefined(): boolean;
-            toBeUndefined(): boolean;
-            toBeNull(): boolean;
-            toBeNaN(): boolean;
-            toBeTruthy(): boolean;
-            toBeFalsy(): boolean;
-            toHaveBeenCalled(): boolean;
-            toHaveBeenCalledWith(...params: any[]): boolean;
-            toContain(expected: any): boolean;
-            toBeLessThan(expected: any): boolean;
-            toBeGreaterThan(expected: any): boolean;
-            toBeCloseTo(expected: any, precision: any): boolean;
-            toContainHtml(expected: string): boolean;
-            toContainText(expected: string): boolean;
-            toThrow(expected?: any): boolean;
-            toThrowError(expected?: any): boolean;
-            not: Matchers;
-
-            Any: Any;
-        }
-
-    interface Reporter
-    {
-            reportRunnerStarting(runner: Runner): void;
-            reportRunnerResults(runner: Runner): void;
-            reportSuiteResults(suite: Suite): void;
-            reportSpecStarting(spec: Spec): void;
-            reportSpecResults(spec: Spec): void;
-            log(str: string): void;
-        }
-
-    interface MultiReporter extends Reporter
-    {
-        addReporter(reporter: Reporter): void;
-    }
-
-    interface Runner
-    {
-
-        new (env: Env): any;
-
-            execute(): void;
-            beforeEach(beforeEachFunction: SpecFunction): void;
-            afterEach(afterEachFunction: SpecFunction): void;
-            beforeAll(beforeAllFunction: SpecFunction): void;
-            afterAll(afterAllFunction: SpecFunction): void;
-            finishCallback(): void;
-            addSuite(suite: Suite): void;
-            add(block: Block): void;
-            specs(): Spec[];
-            suites(): Suite[];
-            topLevelSuites(): Suite[];
-            results(): NestedResults;
-        }
-
-    interface SpecFunction
-    {
-            (spec?: Spec): void;
-        }
-
-    interface SuiteOrSpec
-    {
-        id: number;
-            env: Env;
-            description: string;
-            queue: Queue;
-        }
-
-    interface Spec extends SuiteOrSpec
-    {
-
-        new (env: Env, suite: Suite, description: string): any;
-
-        suite: Suite;
-
-        afterCallbacks: SpecFunction[];
-        spies_: Spy[];
-
-        results_: NestedResults;
-        matchersClass: Matchers;
-
-        getFullName(): string;
-        results(): NestedResults;
-        log(arguments: any): any;
-        runs(func: SpecFunction): Spec;
-        addToQueue(block: Block): void;
-        addMatcherResult(result: Result): void;
-        expect(actual: any): any;
-        waits(timeout: number): Spec;
-        waitsFor(latchFunction: SpecFunction, timeoutMessage?: string, timeout?: number): Spec;
-        fail(e?: any): void;
-        getMatchersClass_(): Matchers;
-        addMatchers(matchersPrototype: any): void;
-        finishCallback(): void;
-        finish(onComplete?: () => void): void;
-        after(doAfter: SpecFunction): void;
-        execute(onComplete?: () => void): any;
-        addBeforesAndAftersToQueue(): void;
-        explodes(): void;
-        spyOn(obj: any, methodName: string, ignoreMethodDoesntExist: boolean): Spy;
-        removeAllSpies(): void;
-    }
-
-    interface XSpec
-    {
-        id: number;
-            runs(): void;
-        }
-
-    interface Suite extends SuiteOrSpec
-    {
-
-        new (env: Env, description: string, specDefinitions: () => void, parentSuite: Suite): any;
-
-        parentSuite: Suite;
-
-        getFullName(): string;
-        finish(onComplete?: () => void): void;
-        beforeEach(beforeEachFunction: SpecFunction): void;
-        afterEach(afterEachFunction: SpecFunction): void;
-        beforeAll(beforeAllFunction: SpecFunction): void;
-        afterAll(afterAllFunction: SpecFunction): void;
-        results(): NestedResults;
-        add(suiteOrSpec: SuiteOrSpec): void;
-        specs(): Spec[];
-        suites(): Suite[];
-        children(): any[];
-        execute(onComplete?: () => void): void;
-    }
-
-    interface XSuite
-    {
-            execute(): void;
-        }
-
-    interface Spy
-    {
-        (...params: any[]): any;
-
-        identity: string;
-        and: SpyAnd;
-        calls: Calls;
-        mostRecentCall: { args: any[]; };
-        argsForCall: any[];
-        wasCalled: boolean;
-        callCount: number;
-    }
-
-        interface SpyAnd
-    {
-        callThrough(): Spy;
-        returnValue(val: any): void;
-        callFake(fn: Function): Spy;
-        throwError(msg: string): void;
-        stub(): Spy;
-    }
-
-    interface Calls
-    {
-        any(): boolean;
-        count(): number;
-        argsFor(index: number): any[];
-        allArgs(): any[];
-        all(): any;
-        mostRecent(): any;
-        first(): any;
-        reset(): void;
-    }
-
-    interface Util
-    {
-        inherit(childClass: Function, parentClass: Function): any;
-        formatException(e: any): any;
-        htmlEscape(str: string): string;
-        argsToArray(args: any): any;
-        extend(destination: any, source: any): any;
-    }
-
-    interface JsApiReporter extends Reporter
-    {
-
-        started: boolean;
-        finished: boolean;
-        result: any;
-        messages: any;
-
-        new (): any;
-
-        suites(): Suite[];
-        summarize_(suiteOrSpec: SuiteOrSpec): any;
-        results(): any;
-        resultsForSpec(specId: any): any;
-        log(str: any): any;
-        resultsForSpecs(specIds: any): any;
-        summarizeResult_(result: any): any;
-    }
-
+    TODO:    
+    
     interface Jasmine
     {
         Spec: Spec;
         clock: Clock;
-        util: Util;
+        util: IUtil;
     }
 
     export var HtmlReporter: HtmlReporter;
@@ -631,7 +758,3 @@ public static class jasmine
     export var DEFAULT_TIMEOUT_INTERVAL: number;
     */
 }
-
-
-
-
