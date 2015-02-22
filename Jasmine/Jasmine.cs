@@ -23,7 +23,10 @@ namespace Jasmine
         public object actual;
         public Env spec;
         public bool isNot = false;
-        public object message() { }
+        public object message()
+        {
+            return null;
+        }
 
         public bool toBe(object expected) { return false; }
         public bool toEqual(object expected) { return false; }
@@ -42,7 +45,7 @@ namespace Jasmine
         public bool toBeGreaterThan(object expected) { return false; }
         public bool toBeCloseTo(object expected, int precision) { return false; }
         public bool toThrow() { return false; }
-        public bool toThrow(object expected) { return false; }
+        public bool toThrowError(object expected = null) { return false; }
 
         [IntrinsicProperty]
         public Matcher not { get { return null; } }
@@ -54,20 +57,11 @@ namespace Jasmine
     }
 
     [Imported]
-    public class SpyCall
-    {
-        public object[] args;
-    }
-
-    [Imported]
     public class Spy
     {
         public string identity;
-        public SpyCall mostRecentCall;
-        public Calls calls;
-        public Spy andCallThrough() { return null; }
-        public Spy andReturn(object o) { return null; }
-        public Spy andCallFake<T>(Func<T> function) { return null; }
+        public ICalls calls;
+        public ISpyAnd and;
         [InlineCode("{this}({*args})")]
         public void Call(params object[] args) { }
 
@@ -170,11 +164,23 @@ namespace Jasmine
         [InlineCode("spyOn({o},{methodname})")]
         public static Spy spyOn(object o, string methodname) { return null; }
 
-        [InlineCode("jasmine.createSpy({name})")]
-        public Spy createSpy(string name) { return null; }
+        [InlineCode("jasmine.createSpy({name}, {originalFunction})")]
+        public static Jasmine.Spy createSpy(string name, Delegate originalFunction = null)
+        {
+            return null;
+        }
 
-        [InlineCode("jasmine.createSpyObj({name},{args})")]
-        public Spy createSpyObj(string name, string[] args) { return null; }
+        [InlineCode("jasmine.createSpyObj({baseName}, {methodNames})")]
+        public static dynamic createSpyObj(string baseName, string[] methodNames)
+        {
+            return null;
+        }
+
+        [InlineCode("jasmine.createSpyObj({baseName}, {methodNames})")]
+        public static T createSpyObj<T>(string baseName, string[] methodNames)
+        {
+            return default(T);
+        }
 
         // clock mock
 
@@ -182,7 +188,7 @@ namespace Jasmine
         [InlineCode("runs({func})")]
         public static void runs(Action func) { }
 
-        [InlineCode("waitsFor({func},{failure_message},{timeout})")]
+        [InlineCode("waitsFor({func},{failureMessage},{timeout})")]
         public static void waitsFor(Func<bool> func, string failureMessage, int timeout) { }
 
         [InlineCode("waitsFor({func},'',{timeout})")]
@@ -190,18 +196,85 @@ namespace Jasmine
 
         [InlineCode("waitsFor({func})")]
         public static void waitsFor(Func<bool> func) { }
-    }
+
+        [InlineCode("jasmine.clock()")]
+        public static Clock clock()
+        {
+            return null;
+        }
+
+        [InlineCode("jasmine.Spec()")]
+        public static Spec Spec()
+        {
+            return null;
+        }
+        
+        [InlineCode("jasmine.any({any})")]
+        public static IAny any(object any)
+        {
+            return null;
+        }
+
+        [InlineCode("jasmine.objectContaining({sample})")]
+        public static IObjectContaining objectContaining(object sample)
+        {
+            return null;
+        }
+
+        [InlineCode("jasmine.pp({value})")]
+        public static string pp(object value)
+        {
+            return null;
+        }
+
+        [InlineCode("jasmine.getEnv()")]
+        public static Env getEnv()
+        {
+            return null;
+        }
+
+        [InlineCode("jasmine.addMatchers({matcher})")]
+        public static void addMatcher(object matcher) { } //TODO: create a Matcher interface that is a function that return an object that has a compar node, which returns a result object 
+
+        public static class Util
+        {
+            public static object inherit(Function childClass, Function parentClass)
+            {
+                return null;
+            }
+            public static object formatException(object e)
+            {
+                return null;
+            }
+            public static string htmlEscape(string str)
+            {
+                return null;
+            }
+            public static object argsToArray(object args)
+            {
+                return null;
+            }
+            public static object extend(object destination, object source)
+            {
+                return null;
+            }
+        }
+        
+        public static double DEFAULT_TIMEOUT_INTERVAL {
+            [InlineCode("jasmine.DEFAULT_TIMEOUT_INTERVAL")]
+            get { return 5000; }
+            [InlineCode("jasmine.DEFAULT_TIMEOUT_INTERVAL = {value}")]
+            set {}}
+
+        }
 
     [Imported]
     public class Clock
     {
-        [InlineCode("install()")]
         public void install() { }
-
-        [InlineCode("uninstall()")]
+        
         public void uninstall() { }
-
-        [InlineCode("tick({ms})")]
+        
         public void tick(int ms) { }
     }
     [Imported]
@@ -223,7 +296,7 @@ namespace Jasmine
     }
 
     [Imported]
-    public interface Block
+    public interface IBlock
     {
         object Block(Env env, SpecFunction func, Spec spec);
 
@@ -231,13 +304,13 @@ namespace Jasmine
     }
 
     [Imported]
-    public interface WaitsBlock : Block
+    public interface IWaitsBlock : IBlock
     {
         object WaitsBlock(Env env, int timeout, Spec spec);
     }
 
     [Imported]
-    public interface WaitsForBlock : Block
+    public interface IWaitsForBlock : IBlock
     {
         object WaitsBlock(Env env, int timeout, SpecFunction latchFunction, string message, Spec spec);
     }
@@ -278,13 +351,13 @@ namespace Jasmine
         }
         public void beforeEach(Action beforeEachFunction){}
         public void beforeAll(Action beforeAllFunction){}
-        public Runner currentRunner()
+        public IRunner currentRunner()
         {
             return null;
         }
         public void afterEach(Action afterEachFunction){}
         public void afterAll(Action afterAllFunction){}
-        public XSuite xdescribe(string desc, Action specDefinitions)
+        public IXSuite xdescribe(string desc, Action specDefinitions)
         {
             return null;
         }
@@ -320,7 +393,7 @@ namespace Jasmine
     }
 
     [Imported]
-    public interface FakeTimer
+    public interface IFakeTimer
     {
         object FakeTimer();
 
@@ -331,13 +404,13 @@ namespace Jasmine
     }
 
     [Imported]
-    public interface HtmlReporter
+    public interface IHtmlReporter
     {
         object HtmlReporter();
     }
 
     [Imported]
-    public interface HtmlSpecFilter
+    public interface IHtmlSpecFilter
     {
         object HtmlSpecFilter();
     }
@@ -405,7 +478,7 @@ namespace Jasmine
     }
 
     [Imported]
-    public interface PrettyPrinter
+    public interface IPrettyPrinter
     {
         object PrettyPrinter();
 
@@ -419,25 +492,24 @@ namespace Jasmine
     }
 
     [Imported]
-    public interface StringPrettyPrinter : PrettyPrinter
+    public interface IStringPrettyPrinter : IPrettyPrinter
     {
     }
 
     [Imported]
     public class Queue
     {
-
         private Queue(object env){ }
 
         public Env env;
         public bool[] ensured;
-        public Block[] blocks;
+        public IBlock[] blocks;
         public bool running;
         public int index;
         public int offset;
         public bool abort;
 
-        public void addBefore(Block block, bool ensure = false) { }
+        public void addBefore(IBlock block, bool ensure = false) { }
         public void add(object block, bool ensure = false) { }
         public void insertNext(object block, bool ensure = false) { }
         public void start(Action onComplete = null) { }
@@ -455,8 +527,8 @@ namespace Jasmine
 
     public class Reporter
     {
-        public void reportRunnerStarting(Runner runner) { }
-        public void reportRunnerResults(Runner runner) { }
+        public void reportRunnerStarting(IRunner runner) { }
+        public void reportRunnerResults(IRunner runner) { }
         public void reportSuiteResults(Suite suite) { }
         public void reportSpecStarting(Spec spec) { }
         public void reportSpecResults(Spec spec) { }
@@ -468,7 +540,7 @@ namespace Jasmine
         public void addReporter(Reporter reporter) { }
     }
 
-    public interface Runner
+    public interface IRunner
     {
         object Runner(Env env);
 
@@ -479,7 +551,7 @@ namespace Jasmine
         void afterAll(SpecFunction afterAllFunction);
         void finishCallback();
         void addSuite(Suite suite);
-        void add(Block block);
+        void add(IBlock block);
         Spec[] specs();
         Suite[] suites();
         Suite[] topLevelSuites();
@@ -525,7 +597,7 @@ namespace Jasmine
         {
             return null;
         }
-        public void addToQueue(Block block) { }
+        public void addToQueue(IBlock block) { }
         public void addMatcherResult(Result result) { }
         public object expect(object actual)
         {
@@ -605,13 +677,14 @@ namespace Jasmine
         public void execute(Action onComplete = null) { }
     }
 
-    public interface XSuite
+    public interface IXSuite
     {
         void execute();
     }
 
-    public interface SpyAnd
+    public interface ISpyAnd
     {
+        string identity();
         Spy callThrough();
         void returnValue(object val);
         Spy callFake(Function fn);
@@ -619,25 +692,26 @@ namespace Jasmine
         Spy stub();
     }
 
-    public interface Calls
+    public interface ICalls
     {
         bool any();
         int count();
         object[] argsFor(int index);
-        object[] allArgs();
-        object all();
-        object mostRecent();
-        object first();
+        object[][] allArgs();
+        SpyCall[] all();
+        SpyCall mostRecent();
+        SpyCall first();
         void reset();
     }
 
-    public interface IUtil
+    [Imported]
+    [PreserveMemberCase(false)]
+    public sealed class SpyCall
     {
-        object inherit(Function childClass, Function parentClass);
-        object formatException(object e);
-        string htmlEscape(string str);
-        object argsToArray(object args);
-        object extend(object destination, object source);
+        private SpyCall() { }
+
+        public object[] Args;
+        public object Object;
     }
     
     public class JsApiReporter : Reporter
@@ -681,80 +755,22 @@ namespace Jasmine
     }
 }
 
-public static class jasmine
-{
-    [InlineCode("jasmine.clock()")]
-    public static Jasmine.Clock clock()
-    {
-        return null;
-    }
+//public static class jasmine
+//{
 
-    [InlineCode("jasmine.Spec()")]
-    public static Jasmine.Spec Spec()
-    {
-        return null;
-    }
+
+//    /*
+//    TODO:    
     
-    public static Jasmine.IUtil util;
+//    interface Jasmine
+//    {
+//        Spec: Spec;
+//        clock: Clock;
+//        util: IUtil;
+//    }
 
-    [InlineCode("jasmine.any({any})")]
-    public static Jasmine.IAny any(object any)
-    {
-        return null;
-    }
-
-    [InlineCode("jasmine.objectContaining({sample})")]
-    public static Jasmine.IObjectContaining objectContaining(object sample)
-    {
-        return null;
-    }
-
-    [InlineCode("jasmine.createSpy({name}, {originalFunction})")]
-    public static Jasmine.Spy createSpy(string name, Delegate originalFunction = null)
-    {
-        return null;
-    }
-
-    [InlineCode("jasmine.createSpyObj({baseName}, {methodNames})")]
-    public static dynamic createSpyObj(string baseName, string[] methodNames)
-    {
-        return null;
-    }
-
-    [InlineCode("jasmine.createSpyObj({baseName}, {methodNames})")]
-    public static T createSpyObj<T>(string baseName, string[] methodNames)
-    {
-        return default(T);
-    }
-
-    [InlineCode("jasmine.pp({value})")]
-    public static string pp(object value)
-    {
-        return null;
-    }
-
-    [InlineCode("jasmine.getEnv()")]
-    public static Jasmine.Env getEnv()
-    {
-        return null;
-    }
-
-    [InlineCode("jasmine.addMatchers({matcher})")]
-    public static void addMatcher(object matcher) { } //TODO: create a Matcher interface that is a function that return an object that has a compar node, which returns a result object 
-
-
-    /*
-    TODO:    
-    
-    interface Jasmine
-    {
-        Spec: Spec;
-        clock: Clock;
-        util: IUtil;
-    }
-
-    export var HtmlReporter: HtmlReporter;
-    export var HtmlSpecFilter: HtmlSpecFilter;
-    export var DEFAULT_TIMEOUT_INTERVAL: number;
-    */
-}
+//    export var HtmlReporter: HtmlReporter;
+//    export var HtmlSpecFilter: HtmlSpecFilter;
+//    export var DEFAULT_TIMEOUT_INTERVAL: number;
+//    */
+//}
