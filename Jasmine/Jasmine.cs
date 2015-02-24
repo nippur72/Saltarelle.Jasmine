@@ -15,9 +15,9 @@ using System.Text.RegularExpressions;
 namespace Jasmine
 {
     [Imported]
-    public class Matcher
+    public class Matchers
     {
-        private Matcher(Env env, object actual, Env spec, bool isNot = false) { }
+        private Matchers(Env env, object actual, Env spec, bool isNot = false) { }
 
         public Env env;
         public object actual;
@@ -45,15 +45,46 @@ namespace Jasmine
         public bool toBeGreaterThan(object expected) { return false; }
         public bool toBeCloseTo(object expected, int precision) { return false; }
         public bool toThrow() { return false; }
-        public bool toThrowError(object expected = null) { return false; }
+        public bool toThrowError() { return false; }
+        public bool toThrowError(object expected) { return false; }
 
         [IntrinsicProperty]
-        public Matcher not { get { return null; } }
+        public Matchers not { get { return null; } }
 
         // any matcher
         public IAny Any;
 
         // typeof matcher?
+    }
+
+    [PreserveMemberCase(false)]
+    public abstract class CustomMatcher<T>
+    {
+        public abstract MatcherResult Compare(object actual, T expect);
+    }
+
+    [PreserveMemberCase(false)]
+    public class MatcherResult
+    {
+        public bool Pass;
+        public string Message;
+
+        public MatcherResult(bool pass, string message)
+        {
+            Pass = pass;
+            Message = message;
+        }
+    }
+
+    
+    public interface ICustomMatcherUtil
+    {
+        [PreserveName]
+        string buildFailureMessage();
+        [PreserveName]
+        bool contains(object haystack, object needle, object customTesters);
+        [PreserveName]
+        bool equals(object a, object b, object customTesters);
     }
 
     [Imported]
@@ -120,10 +151,10 @@ namespace Jasmine
         public void pending() { }
 
         [InlineCode("expect({o})")]
-        public Matcher expect(object o) { return null; }
+        public Matchers expect(object o) { return null; }
 
         [InlineCode("expect({d})")]
-        public Matcher expect(Delegate d) { return null; }
+        public Matchers expect(Delegate d) { return null; }
 
         [InlineCode("beforeEach({func})")]
         public static void beforeEach(Action func) { }
@@ -164,8 +195,12 @@ namespace Jasmine
         [InlineCode("spyOn({o},{methodname})")]
         public static Spy spyOn(object o, string methodname) { return null; }
 
-        [InlineCode("jasmine.createSpy({name}, {originalFunction})")]
-        public static Jasmine.Spy createSpy(string name, Delegate originalFunction = null)
+        [InlineCode("jasmine.createSpy({name})")]
+        public static Jasmine.Spy createSpy(string name)
+        {
+            return null;
+        }
+        public static Jasmine.Spy createSpy(string name, Delegate originalFunction)
         {
             return null;
         }
@@ -234,15 +269,24 @@ namespace Jasmine
         }
 
         [InlineCode("jasmine.addMatchers({matcher})")]
-        public static void addMatcher(object matcher) { } //TODO: create a Matcher interface that is a function that return an object that has a compar node, which returns a result object 
+        public static void addMatchers(object matcher) { } //TODO: create a Matcher interface that is a function that return an object that has a compar node, which returns a result object 
 
+        [InlineCode("jasmine.addCustomEqualityTester({customEquality})")]
+        public static void addCustomEqualityTester(object customEquality) { }
+        
+        [Imported]
         public static class Util
         {
-            public static object inherit(Function childClass, Function parentClass)
+
+            public static object argsToArray(object args)
             {
                 return null;
             }
-            public static object formatException(object e)
+            public static bool arrayContains(Array array, object contains)
+            {
+                return false;
+            }
+            public static object clone(object obj)
             {
                 return null;
             }
@@ -250,13 +294,13 @@ namespace Jasmine
             {
                 return null;
             }
-            public static object argsToArray(object args)
+            public static object inherit(Function childClass, Function parentClass)
             {
                 return null;
             }
-            public static object extend(object destination, object source)
+            public static bool isUndefined(object obj)
             {
-                return null;
+                return false;
             }
         }
         
@@ -328,7 +372,7 @@ namespace Jasmine
 
         public Spec currentSpec;
 
-        public Matcher matchersClass;
+        public Matchers matchersClass;
 
         public object version()
         {
@@ -509,10 +553,14 @@ namespace Jasmine
         public int offset;
         public bool abort;
 
-        public void addBefore(IBlock block, bool ensure = false) { }
-        public void add(object block, bool ensure = false) { }
-        public void insertNext(object block, bool ensure = false) { }
-        public void start(Action onComplete = null) { }
+        public void addBefore(IBlock block) { }
+        public void addBefore(IBlock block, bool ensure) { }
+        public void add(object block) { }
+        public void add(object block, bool ensure) { }
+        public void insertNext(object block) { }
+        public void insertNext(object block, bool ensure) { }
+        public void start() { }
+        public void start(Action onComplete) { }
         public bool isRunning()
         {
             return false;
@@ -557,8 +605,8 @@ namespace Jasmine
         Suite[] topLevelSuites();
         NestedResults results();
     }
-
-    public delegate void SpecFunction(Spec spec = null);
+    
+    public delegate void SpecFunction(Spec spec = null); //TODO overload?
 
     public class SuiteOrSpec
     {
@@ -579,7 +627,7 @@ namespace Jasmine
         public Spy[] spies_;
 
         public NestedResults results_;
-        public Matcher matchersClass;
+        public Matchers matchersClass;
 
         public string getFullName()
         {
@@ -607,20 +655,26 @@ namespace Jasmine
         {
             return null;
         }
-        public Spec waitsFor(SpecFunction latchFunction, string timeoutMessage = null, int timeout = 0)
+        public Spec waitsFor(SpecFunction latchFunction, string timeoutMessage = null, int timeout = 0)//TODO overload?
         {
             return null;
         }
-        public void fail(object e = null) { }
-        public Matcher getMatchersClass_()
+        public void fail() { }
+        public void fail(object e) { }
+        public Matchers getMatchersClass_()
         {
             return null;
         }
         public void addMatchers(object matchersPrototype) { }
         public void finishCallback() { }
-        public void finish(Action onComplete = null) { }
+        public void finish() { }
+        public void finish(Action onComplete) { }
         public void after(SpecFunction doAfter) { }
-        public object execute(Action onComplete = null)
+        public object execute()
+        {
+            return null;
+        }
+        public object execute(Action onComplete)
         {
             return null;
         }
@@ -652,7 +706,8 @@ namespace Jasmine
         {
             return null;
         }
-        public void finish(Action onComplete = null) { }
+        public void finish() { }
+        public void finish(Action onComplete) { }
         public void beforeEach(SpecFunction beforeEachFunction) { }
         public void afterEach(SpecFunction afterEachFunction) { }
         public void beforeAll(SpecFunction beforeAllFunction) { }
@@ -674,7 +729,8 @@ namespace Jasmine
         {
             return null;
         }
-        public void execute(Action onComplete = null) { }
+        public void execute() { }
+        public void execute(Action onComplete) { }
     }
 
     public interface IXSuite

@@ -112,8 +112,8 @@ public class JasmineTests : JasmineSuite
 
             it("The 'toBe' matcher compares with ===", () =>
             {
-                var a = 12;
-                var b = a;
+                int a = 12;
+                int b = a;
 
                 expect(a).toBe(b);
                 expect(a).not.toBe(null);
@@ -124,7 +124,7 @@ public class JasmineTests : JasmineSuite
 
                 it("works for simple literals and variables", () =>
                 {
-                    var a = 12;
+                    int a = 12;
                     expect(a).toEqual(12);
                 });
 
@@ -146,7 +146,7 @@ public class JasmineTests : JasmineSuite
 
             it("The 'toMatch' matcher is for regular expressions", () =>
             {
-                var message = "foo bar baz";
+                string message = "foo bar baz";
 
                 //expect(message).toMatch(/bar/);       // regex literal expressions do not exist in C#
                 expect(message).toMatch("bar");
@@ -178,7 +178,7 @@ public class JasmineTests : JasmineSuite
             it("The 'toBeNull' matcher compares against null", () =>
             {
                 string a = null;
-                var foo = "foo";
+                string foo = "foo";
 
                 expect(null).toBeNull();
                 expect(a).toBeNull();
@@ -188,7 +188,7 @@ public class JasmineTests : JasmineSuite
             it("The 'toBeTruthy' matcher is for boolean casting testing", () =>
             {
                 string a = null;
-                var foo = "foo";
+                string foo = "foo";
 
                 expect(foo).toBeTruthy();
                 expect(a).not.toBeTruthy();
@@ -197,7 +197,7 @@ public class JasmineTests : JasmineSuite
             it("The 'toBeFalsy' matcher is for boolean casting testing", () =>
             {
                 string a = null;
-                var foo = "foo";
+                string foo = "foo";
 
                 expect(a).toBeFalsy();
                 expect(foo).not.toBeFalsy();
@@ -205,7 +205,7 @@ public class JasmineTests : JasmineSuite
 
             it("The 'toContain' matcher is for finding an item in an Array", () =>
             {
-                var a = new string[] { "foo", "bar", "baz" };
+                string[] a = new string[] { "foo", "bar", "baz" };
 
                 expect(a).toContain("bar");
                 expect(a).not.toContain("quux");
@@ -213,8 +213,8 @@ public class JasmineTests : JasmineSuite
 
             it("The 'toBeLessThan' matcher is for mathematical comparisons", () =>
             {
-                var pi = 3.1415926;
-                var e = 2.78;
+                double pi = 3.1415926;
+                double e = 2.78;
 
                 expect(e).toBeLessThan(pi);
                 expect(pi).not.toBeLessThan(e);
@@ -222,8 +222,8 @@ public class JasmineTests : JasmineSuite
 
             it("The 'toBeGreaterThan' is for mathematical comparisons", () =>
             {
-                var pi = 3.1415926;
-                var e = 2.78;
+                double pi = 3.1415926;
+                double e = 2.78;
 
                 expect(pi).toBeGreaterThan(e);
                 expect(e).not.toBeGreaterThan(pi);
@@ -231,8 +231,8 @@ public class JasmineTests : JasmineSuite
 
             it("The 'toBeCloseTo' matcher is for precision math comparison", () =>
             {
-                var pi = 3.1415926;
-                var e = 2.78;
+                double pi = 3.1415926;
+                double e = 2.78;
 
                 expect(pi).not.toBeCloseTo(e, 2);
                 expect(pi).toBeCloseTo(e, 0);
@@ -266,7 +266,7 @@ public class JasmineTests : JasmineSuite
         {
             it("is just a function, so it can contain any code", () =>
             {
-                var foo = 0;
+                int foo = 0;
                 foo += 1;
 
                 expect(foo).toEqual(1);
@@ -274,7 +274,7 @@ public class JasmineTests : JasmineSuite
 
             it("can have more than one expectation", () =>
             {
-                var foo = 0;
+                int foo = 0;
                 foo += 1;
 
                 expect(foo).toEqual(1);
@@ -801,7 +801,7 @@ public class JasmineTests : JasmineSuite
              */
             it("tracks the context", () =>
           {
-              var spy = createSpy("spy");
+              Spy spy = createSpy("spy");
               var baz = new
               {
                   fn = spy
@@ -978,7 +978,7 @@ public class JasmineTests : JasmineSuite
             {
                 it("is useful for comparing arguments", () =>
                 {
-                    var callback = createSpy("callback");
+                    Spy callback = createSpy("callback");
 
                     callback.Call(new
                     {
@@ -1113,7 +1113,7 @@ public class JasmineTests : JasmineSuite
                 beforeEach(() =>
                 {
                     originalTimeout = DEFAULT_TIMEOUT_INTERVAL;
-                    DEFAULT_TIMEOUT_INTERVAL = 10000;
+                    DEFAULT_TIMEOUT_INTERVAL = 100;
                 });
 
                 it("takes a long time", (done) =>
@@ -1121,7 +1121,7 @@ public class JasmineTests : JasmineSuite
                     Window.SetTimeout(() =>
                     {
                        done();
-                    }, 9000);
+                    }, 90);
                 });
 
                 afterEach(() =>
@@ -1131,8 +1131,206 @@ public class JasmineTests : JasmineSuite
             });
         });
 
+
+        /**
+         *
+         * Often a project will want to encapsulate custom matching code for use across multiple specs. Here is how to create a Jasmine-compatible custom matcher.
+         *
+         * A custom matcher at its root is a comparison function that takes an `actual` value and `expected` value. This factory is passed to Jasmine, ideally in a call to `beforeEach` and will be in scope and available for all of the specs inside a given call to `describe`. Custom matchers are torn down between specs. The name of the factory will be the name of the matcher exposed on the return value of the call to `expect`.
+         *
+         */
+
+        /**
+         * This object has a custom matcher named "toBeGoofy".
+         */
+        var customMatchers = new {
+
+            /**
+            * ## Matcher Factories
+            *
+            * Custom matcher factories are passed two parameters: `util`, which has a set of utility functions for matchers to use (see: [`matchersUtil.js`][mu.js] for the current list) and `customEqualityTesters` which needs to be passed in if `util.equals` is ever called. These parameters are available for use when then matcher is called.
+            *
+            * [mu.js]: https://github.com/pivotal/jasmine/blob/master/src/core/matchers/matchersUtil.js
+            */
+            /**
+            * The factory method should return an object with a `compare` function that will be called to check the expectation.
+            */
+            toBeGoofy =  new Func<ICustomMatcherUtil, object, CustomMatcher<string>>(
+                (util, customEqualityTesters) => new ToBeGoofy(util, customEqualityTesters))
+            };
+
+        /**
+        * ### Custom negative comparators
+        *
+        * If you need more control over the negative comparison (the `not` case) than the simple boolean inversion above, you can also have your matcher factory include another key, `negativeCompare` alongside `compare`, for which the value is a function to invoke when `.not` is used. This function/key is optional.
+        */
+
+        /**
+         * ## Registration and Usage
+         */
+        describe("Custom matcher: 'toBeGoofy'", () =>
+        {
+            /**
+             * Register the custom matchers with Jasmine. All properties on the object passed in will be available as custom matchers (e.g., in this case `toBeGoofy`).
+             */
+            beforeEach(() => {
+                addMatchers(customMatchers);
+            });
+
+            /**
+             * Once a custom matcher is registered with Jasmine, it is available on any expectation.
+             */
+            it("is available on an expectation", () =>
+            {
+                expect(new
+                {
+                    hyuk = "gawrsh"
+                }).toBeGoofy(); //extension method
+            });
+
+            it("can take an 'expected' parameter", () =>
+            {
+                expect(new
+                {
+                    hyuk = "gawrsh is fun"
+                }).toBeGoofy(" is fun");
+            });
+
+            it("can be negated", () =>
+            {
+                expect(new
+                {
+                    hyuk = "this is fun"
+                }).not.toBeGoofy();
+            });
+        });
+
+        /**
+        * ## Custom Equality Testers
+        */
+        describe("custom equality", () => {
+            /**
+             * You can customize how jasmine determines if two objects are equal by defining your own custom equality testers.
+             * A custom equality tester is a function that takes two arguments.
+             */
+            var myCustomEquality = new Func<string, string, bool>((first, second) => {
+                /**
+                 * If the custom equality tester knows how to compare the two items, it should return either true or false
+                 */
+
+                if (Script.TypeOf(first) == "string" && Script.TypeOf(second) == "string")
+                {
+                    return first[0] == second[1];
+                }
+
+                return false;
+
+                /**
+                 * Otherwise, it should return undefined, to tell jasmine's equality tester that it can't compare the items
+                 */
+            });
+
+            /**
+             * Then you register your tester in a `beforeEach` so jasmine knows about it.
+             */
+            beforeEach(() => {
+                addCustomEqualityTester(myCustomEquality);
+            });
+
+            /**
+             * Then when you do comparisons in a spec, custom equality testers will be checked first before the default equality logic.
+             */
+            it("should be custom equal", () => {
+                expect("abc").toEqual("aaa");
+            });
+
+            /**
+             * If your custom tester returns false, no other equality checking will be done.
+             */
+            it("should be custom not equal", () => {
+                expect("abc").not.toEqual("abc");
+            });
+        });
+
+    }
+
+    public class ToBeGoofy : CustomMatcher<string>
+    {
+        public static ICustomMatcherUtil Util;
+        public static object CustomEqualityTesters;
+
+        public ToBeGoofy(ICustomMatcherUtil util, object customEqualityTesters)
+        {
+            ToBeGoofy.Util = util;
+            ToBeGoofy.CustomEqualityTesters = customEqualityTesters;
+        }
+
+        /**
+        * ## A Function to `compare`
+        *
+        * The compare function receives the value passed to `expect()` as the first argument - the actual - and the value (if any) passed to the matcher itself as second argument.
+        */
+        public override MatcherResult Compare(object actual, string expected) {
+
+            /**
+                * `toBeGoofy` takes an optional `expected` argument, so define it here if not passed in.
+                */
+            if (expected == Script.Undefined)
+            {
+                expected = "";
+            }
+
+            /**
+            * ### Result
+            *
+            * The `compare` function must return a result object with a `pass` property that is a boolean result of the matcher. The `pass` property tells the expectation whether the matcher was successful (`true`) or unsuccessful (`false`). If the expectation is called/chained with `.not`, the expectation will negate this to determine whether the expectation is met.
+            */
+            bool resultPass = false;
+            string resultMessage = "";
+            /**
+            * `toBeGoofy` tests for equality of the actual's `hyuk` property to see if it matches the expectation.
+            */
+            resultPass = ToBeGoofy.Util.equals(((JsDictionary)actual)["hyuk"], "gawrsh" + expected, ToBeGoofy.CustomEqualityTesters);
+
+            /**
+            * ### Failure Messages
+            *
+            * If left `undefined`, the expectation will attempt to craft a failure message for the matcher. However, if the return value has a `message` property it will be used for a  failed expectation.
+            */
+            if (resultPass)
+            {
+                /**
+                * The matcher succeeded, so the custom failure message should be present in the case of a negative expectation - when the expectation is used with `.not`.
+                */
+                resultMessage = "Expected " + actual + " not to be quite so goofy";
+            }
+            else
+            {
+                /**
+                * The matcher failed, so the custom failure message should be present in the case of a positive expectation
+                */
+                resultMessage = "Expected " + actual + " to be goofy, but it was not very goofy";
+            }
+
+            /**
+            * Return the result of the comparison.
+            */
+            return new MatcherResult(resultPass, resultMessage);
+        }
     }
 }
 
+public static class MatcherExtensions
+{
+    [InstanceMethodOnFirstArgument]
+    public static bool toBeGoofy(this Matchers matcher)
+    {
+        return false;
+    }
 
-
+    [InstanceMethodOnFirstArgument]
+    public static bool toBeGoofy(this Matchers matcher, string expected)
+    {
+        return false;
+    }
+}
