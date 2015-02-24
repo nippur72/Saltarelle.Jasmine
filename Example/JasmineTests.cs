@@ -495,7 +495,6 @@ public class JasmineTests : JasmineSuite
             var foo = new { setBar = (Action<string>)null, getBar = (Func<string>)null };
             string bar = null;
             string fetchedBar = null;
-            Spy spy = null;
 
             beforeEach(() =>
             {
@@ -542,7 +541,6 @@ public class JasmineTests : JasmineSuite
             var foo = new { setBar = (Action<string>)null, getBar = (Func<string>)null };
             string bar = null;
             string fetchedBar = null;
-            Spy spy = null;
 
             beforeEach(() =>
             {
@@ -589,7 +587,6 @@ public class JasmineTests : JasmineSuite
             var foo = new { setBar = (Action<string>)null, getBar = (Func<string>)null };
             string bar = null;
             string fetchedBar = null;
-            Spy spy = null;
 
             beforeEach(() =>
             {
@@ -1143,8 +1140,9 @@ public class JasmineTests : JasmineSuite
         /**
          * This object has a custom matcher named "toBeGoofy".
          */
-        var customMatchers = new {
-
+        JsDictionary<string, Func<ICustomMatcherUtil, object, CustomMatcher<string>>> customMatchers =
+            new JsDictionary<string, Func<ICustomMatcherUtil, object, CustomMatcher<string>>>();
+        
             /**
             * ## Matcher Factories
             *
@@ -1155,9 +1153,8 @@ public class JasmineTests : JasmineSuite
             /**
             * The factory method should return an object with a `compare` function that will be called to check the expectation.
             */
-            toBeGoofy =  new Func<ICustomMatcherUtil, object, CustomMatcher<string>>(
-                (util, customEqualityTesters) => new ToBeGoofy(util, customEqualityTesters))
-            };
+        customMatchers["toBeGoofy"] = (util, customEqualityTesters) => new ToBeGoofy(util, customEqualityTesters);
+        
 
         /**
         * ### Custom negative comparators
@@ -1252,6 +1249,167 @@ public class JasmineTests : JasmineSuite
             });
         });
 
+        /**
+         *
+         * If you don't like the way the built-in jasmine reporters look, you can always write your own.
+         *
+         */
+
+        /**
+         * A jasmine reporter is just an object with the right functions available.
+         * None of the functions here are required when creating a custom reporter, any that are not specified on your reporter will just be ignored.
+         */
+        JsApiReporter myReporter = new JsApiReporter(){
+            /**
+             * ### jasmineStarted
+             *
+             * `jasmineStarted` is called after all of the specs have been loaded, but just before execution starts.
+             */
+            jasmineStarted = (suiteInfo) => {
+            /**
+             * suiteInfo contains a property that tells how many specs have been defined
+             */
+                Console.WriteLine("Running suite with " + suiteInfo.totalSpecsDefined);
+            },
+          /**
+           * ### suiteStarted
+           *
+           * `suiteStarted` is invoked when a `describe` starts to run
+           */
+            suiteStarted = (result) => {
+                /**
+                 * the result contains some meta data about the suite itself.
+                 */
+                Console.WriteLine("Suite started: " + result.description + " whose full description is: " + result.fullName);
+            },
+            /**
+            * ### specStarted
+            *
+            * `specStarted` is invoked when an `it` starts to run (including associated `beforeEach` functions)
+            */
+            specStarted = (result) => {
+                /**
+                    * the result contains some meta data about the spec itself.
+                    */
+                Console.WriteLine("Spec started: " + result.description + " whose full description is: " + result.fullName);
+            },
+            /**
+            * ### specDone
+            *
+            * `specDone` is invoked when an `it` and its associated `beforeEach` and `afterEach` functions have been run.
+            *
+            * While jasmine doesn't require any specific functions, not defining a `specDone` will make it impossible for a reporter to know when a spec has failed.
+            */
+            specDone = (result) => {
+                /**
+                    * The result here is the same object as in `specStarted` but with the addition of a status and a list of failedExpectations.
+                    */
+                Console.WriteLine("Spec: " + result.description + " was " + result.status);
+                for (var i = 0; i < result.failedExpectations.Length; i++)
+                {
+                    /**
+                    * Each `failedExpectation` has a message that describes the failure and a stack trace.
+                    */
+                    Console.WriteLine("Failure: " + result.failedExpectations[i].message);
+                    Console.WriteLine(result.failedExpectations[i].stack);
+                }
+            },
+            /**
+            * ### suiteDone
+            *
+            * `suiteDone` is invoked when all of the child specs and suites for a given suite have been run
+            *
+            * While jasmine doesn"t require any specific functions, not defining a `suiteDone` will make it impossible for a reporter to know when a suite has failures in an `afterAll`.
+            */
+            suiteDone = (result) => {
+                /**
+                * The result here is the same object as in `suiteStarted` but with the addition of a status and a list of failedExpectations.
+                */
+                Console.WriteLine("Suite: " + result.description + " was " + result.status);
+                for (var i = 0; i < result.failedExpectations.Length; i++)
+                {
+                    /**
+                    * Any `failedExpectation`s on the suite itself are the result of a failure in an `afterAll`.
+                    * Each `failedExpectation` has a message that describes the failure and a stack trace.
+                    */
+                    Console.WriteLine("AfterAll " + result.failedExpectations[i].message);
+                    Console.WriteLine(result.failedExpectations[i].stack);
+                }
+            },
+            /**
+            * ### jasmineDone
+            *
+            * When the entire suite has finished execution `jasmineDone` is called
+            */
+            jasmineDone = () => {
+                Console.WriteLine("Finished suite");
+            }
+        };
+
+        /**
+            * Register the reporter with jasmine
+            */
+        getEnv().addReporter(myReporter);
+
+        /**
+         * If you look at the console output for this page, you should see the output from this reporter
+         */
+        describe("Top Level suite", () =>
+        {
+            it("spec", () => {
+                expect(1).toBe(1);
+            });
+
+            describe("Nested suite", () => {
+                it("nested spec", () => {
+                    expect(true).toBe(true);
+                });
+            });
+        });
+
+        /**
+         Focusing specs will make it so that they are the only specs that run.
+         */
+
+        //describe("Focused specs", () => {
+
+        //    /** Any spec declared with `fit` is focused.
+        //     */
+        //    fit("is focused and will run", () => {
+        //        expect(true).toBeTruthy();
+        //    });
+
+        //    it("is not focused and will not run", () =>{
+        //        expect(true).toBeFalsy();
+        //    });
+
+        //    /** You can focus on a `describe` with `fdescribe`
+        //     *
+        //     */
+        //    fdescribe("focused describe", () =>{
+        //        it("will run", () =>{
+        //            expect(true).toBeTruthy();
+        //        });
+
+        //        it("will also run", () =>{
+        //            expect(true).toBeTruthy();
+        //        });
+        //    });
+
+        //    /** If you nest focused and unfocused specs inside `fdescribes`, only focused specs run.
+        //     *
+        //     */
+        //    fdescribe("another focused describe", () =>{
+        //        fit("is focused and will run", () => {
+        //            expect(true).toBeTruthy();
+        //        });
+
+        //        it("is not focused and will not run", () =>{
+        //            expect(true).toBeFalsy();
+        //        });
+        //    });
+        //});
+
     }
 
     public class ToBeGoofy : CustomMatcher<string>
@@ -1275,7 +1433,7 @@ public class JasmineTests : JasmineSuite
             /**
                 * `toBeGoofy` takes an optional `expected` argument, so define it here if not passed in.
                 */
-            if (expected == Script.Undefined)
+            if (expected == (string)Script.Undefined)
             {
                 expected = "";
             }

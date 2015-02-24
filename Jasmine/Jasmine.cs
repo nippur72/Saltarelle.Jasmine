@@ -148,13 +148,13 @@ namespace Jasmine
         public static void xit(string desc, Func<Task> func) { }
 
         [InlineCode("pending()")]
-        public void pending() { }
+        public static void pending() { }
 
         [InlineCode("expect({o})")]
-        public Matchers expect(object o) { return null; }
+        public static Matchers expect(object o) { return null; }
 
         [InlineCode("expect({d})")]
-        public Matchers expect(Delegate d) { return null; }
+        public static Matchers expect(Delegate d) { return null; }
 
         [InlineCode("beforeEach({func})")]
         public static void beforeEach(Action func) { }
@@ -572,7 +572,7 @@ namespace Jasmine
             return null;
         }
     }
-
+    
     public class Reporter
     {
         public void reportRunnerStarting(IRunner runner) { }
@@ -583,11 +583,13 @@ namespace Jasmine
         public void log(string str) { }
     }
 
+    [Imported]
     public class MultiReporter : Reporter
     {
         public void addReporter(Reporter reporter) { }
     }
 
+    [Imported]
     public interface IRunner
     {
         object Runner(Env env);
@@ -608,6 +610,7 @@ namespace Jasmine
     
     public delegate void SpecFunction(Spec spec = null); //TODO overload?
 
+    [Imported]
     public class SuiteOrSpec
     {
         public int id;
@@ -616,6 +619,7 @@ namespace Jasmine
         public Queue queue;
     }
 
+    [Imported]
     public class Spec : SuiteOrSpec
     {
 
@@ -687,6 +691,7 @@ namespace Jasmine
         public void removeAllSpies() { }
     }
 
+    [Imported]
     public class XSpec
     {
         private XSpec() { }
@@ -695,6 +700,7 @@ namespace Jasmine
         public void runs() { }
     }
 
+    [Imported]
     public class Suite : SuiteOrSpec
     {
 
@@ -733,11 +739,13 @@ namespace Jasmine
         public void execute(Action onComplete) { }
     }
 
+    [Imported]
     public interface IXSuite
     {
         void execute();
     }
 
+    [Imported]
     public interface ISpyAnd
     {
         string identity();
@@ -748,6 +756,7 @@ namespace Jasmine
         Spy stub();
     }
 
+    [Imported]
     public interface ICalls
     {
         bool any();
@@ -778,7 +787,14 @@ namespace Jasmine
         public object result;
         public object messages;
 
-        private JsApiReporter() { }
+        public Action<IReporterSuiteInfo> jasmineStarted;
+        public Action jasmineDone;
+        public Action<IReporterResult> suiteStarted;
+        public Action<IReporterResult> suiteDone;
+        public Action<IReporterResult> specStarted;
+        public Action<IReporterResult> specDone;
+
+        public JsApiReporter() { }
 
         public Suite[] suites()
         {
@@ -808,6 +824,30 @@ namespace Jasmine
         {
             return null;
         }
+    }
+
+    [PreserveMemberCase]
+    public class IReporterSuiteInfo
+    {
+        public int totalSpecsDefined;
+    }
+
+    [PreserveMemberCase]
+    public class IReporterResult
+    {
+        public int id;
+        public string fullName;
+        public string description;
+        public string status;
+        public IReporterError[] failedExpectations;
+    }
+
+    [PreserveMemberCase]
+    public class IReporterError
+    {
+        public int id;
+        public string stack;
+        public string message;
     }
 }
 
