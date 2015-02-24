@@ -750,7 +750,7 @@ namespace Jasmine
     {
         string identity();
         Spy callThrough();
-        void returnValue(object val);
+        Spy returnValue(object val);
         Spy callFake(Function fn);
         void throwError(string msg);
         Spy stub();

@@ -130,16 +130,12 @@ public class JasmineTests : JasmineSuite
 
                 it("should work for objects", () =>
                 {
-                    var foo = new
-                    {
-                        a = 12,
-                        b = 34
-                    };
-                    var bar = new
-                    {
-                        a = 12,
-                        b = 34
-                    };
+                    JsDictionary<string, int> foo = new JsDictionary<string, int>();
+                    JsDictionary<string, int> bar = new JsDictionary<string, int>();
+                    foo["a"] = 12;
+                    foo["b"] = 34;
+                    bar["a"] = 12;
+                    bar["b"] = 34;
                     expect(foo).toEqual(bar);
                 });
             });
@@ -155,23 +151,19 @@ public class JasmineTests : JasmineSuite
 
             it("The 'toBeDefined' matcher compares against `undefined`", () =>
             {
-                var a = new
-                {
-                    foo = "foo"
-                };
+                JsDictionary<string, string> a = new JsDictionary<string, string>();
+                a["foo"] = "foo";
 
-                expect(a.foo).toBeDefined();
+                expect(a["foo"]).toBeDefined();
                 expect((object)((dynamic)a).bar).not.toBeDefined();    // dynamic so that you can call a.bar from C#
             });
 
             it("The `toBeUndefined` matcher compares against `undefined`", () =>
             {
-                var a = new
-                {
-                    foo = "foo"
-                };
+                JsDictionary<string, string> a = new JsDictionary<string, string>();
+                a["foo"] = "foo";
 
-                expect(a.foo).not.toBeUndefined();
+                expect(a["foo"]).not.toBeUndefined();
                 expect((object)((dynamic)a).bar).toBeUndefined();
             });
 
@@ -428,32 +420,28 @@ public class JasmineTests : JasmineSuite
         // TODO object containing a function
         describe("A spy", () =>
         {
-            var foo = new { setBar = (Action<string>)null };
-
+            JsDictionary<string, Action<string>> foo = new JsDictionary<string, Action<string>>();
+            foo["setBar"] = null;
             string bar = null;
-
             Spy spy = null;
 
             beforeEach(() =>
             {
 
-                foo = new
+                foo["setBar"] = (value) =>
                 {
-                    setBar = new Action<string>((value) =>
-                    {
-                        bar = value;
-                    })
+                    bar = value;
                 };
 
                 spy = spyOn(foo, "setBar");
 
-                foo.setBar("123");
-                foo.setBar("456");
+                foo["setBar"]("123");
+                foo["setBar"]("456");
             });
 
             it("tracks that the spy was called", () =>
             {
-                expect(foo.setBar).toHaveBeenCalled();
+                expect(foo["setBar"]).toHaveBeenCalled();
             });
 
             it("tracks its number of calls", () =>
@@ -492,30 +480,30 @@ public class JasmineTests : JasmineSuite
         // TODO object containing a function
         describe("A spy, when configured to call through", () =>
         {
-            var foo = new { setBar = (Action<string>)null, getBar = (Func<string>)null };
+            JsDictionary foo = new JsDictionary();
+            foo["setBar"] = null;
+            foo["getBar"] = null;
             string bar = null;
             string fetchedBar = null;
+            Spy spy = null;
 
             beforeEach(() =>
             {
-                foo = new
+                foo["setBar"] = new Action<string>((value) =>
                 {
-                    setBar = new Action<string>((value) =>
-                    {
-                        bar = value;
-                    }),
-                    getBar = new Func<string>(() => bar)
-                };
+                    bar = value;
+                });
+                foo["getBar"] = new Func<string>(() => bar);
 
-                spyOn(foo, "getBar").and.callThrough();
+                spy =spyOn(foo, "getBar").and.callThrough();
 
-                foo.setBar("123");
-                fetchedBar = foo.getBar();
+                ((Action<string>)foo["setBar"])("123");
+                fetchedBar = ((Func<string>)foo["getBar"])();
             });
 
             it("tracks that the spy was called", () =>
             {
-                expect(foo.getBar).toHaveBeenCalled();
+                expect(spy).toHaveBeenCalled();
             });
 
             it("should not effect other functions", () =>
@@ -538,30 +526,30 @@ public class JasmineTests : JasmineSuite
         // TODO object containing a function
         describe("A spy, when faking a return value", () =>
         {
-            var foo = new { setBar = (Action<string>)null, getBar = (Func<string>)null };
+            JsDictionary foo = new JsDictionary();
+            foo["setBar"] = null;
+            foo["getBar"] = null;
             string bar = null;
             string fetchedBar = null;
+            Spy spy = null;
 
             beforeEach(() =>
             {
-                foo = new
+                foo["setBar"] = new Action<string>((value) =>
                 {
-                    setBar = new Action<string>((value) =>
-                    {
-                        bar = value;
-                    }),
-                    getBar = new Func<string>(() => bar)
-                };
+                    bar = value;
+                });
+                foo["getBar"] = new Func<string>(() => bar);
 
-                spyOn(foo, "getBar").and.returnValue("745");
+                spy = spyOn(foo, "getBar").and.returnValue("745");
 
-                foo.setBar("123");
-                fetchedBar = foo.getBar();
+                ((Action<string>)foo["setBar"])("123");
+                fetchedBar = ((Func<string>)foo["getBar"])();
             });
 
             it("tracks that the spy was called", () =>
             {
-                expect(foo.getBar).toHaveBeenCalled();
+                expect(spy).toHaveBeenCalled();
             });
 
             it("should not effect other functions", () =>
@@ -582,32 +570,33 @@ public class JasmineTests : JasmineSuite
          By chaining the spy with `and.callFake`, all calls to the spy will delegate to the supplied function.
          */
         // TODO objects containing functions
-        describe("A spy, when faking a return value", () =>
+        describe("A spy, when faking a function", () =>
         {
-            var foo = new { setBar = (Action<string>)null, getBar = (Func<string>)null };
+            JsDictionary foo = new JsDictionary();
+            foo["setBar"] = null;
+            foo["getBar"] = null;
             string bar = null;
             string fetchedBar = null;
+            Spy spy = null;
 
             beforeEach(() =>
             {
-                foo = new
+
+                foo["setBar"] = new Action<string>((value) =>
                 {
-                    setBar = new Action<string>((value) =>
-                    {
-                        bar = value;
-                    }),
-                    getBar = new Func<string>(() => bar)
-                };
+                    bar = value;
+                });
+                foo["getBar"] = new Func<string>(() => bar);
 
-                spyOn(foo, "getBar").and.callFake((Function)(new Func<string>(() => "1001")));
+                spy = spyOn(foo, "getBar").and.callFake((Function)(new Func<string>(() => "1001")));
 
-                foo.setBar("123");
-                fetchedBar = foo.getBar();
+                ((Action<string>)foo["setBar"])("123");
+                fetchedBar = ((Func<string>)foo["getBar"])();
             });
 
             it("tracks that the spy was called", () =>
             {
-                expect(foo.getBar).toHaveBeenCalled();
+                expect(spy).toHaveBeenCalled();
             });
 
             it("should not effect other functions", () =>
@@ -627,17 +616,15 @@ public class JasmineTests : JasmineSuite
         */
         describe("A spy, when configured to throw an error", () =>
         {
-            var foo = new { setBar = (Action<string>)null };
+            JsDictionary<string, Action<string>> foo = new JsDictionary<string, Action<string>>();
+            foo["setBar"] = null;
             string bar = null;
 
             beforeEach(() =>
             {
-                foo = new
+                foo["setBar"] = (value) =>
                 {
-                    setBar = new Action<string>((value) =>
-                    {
-                        bar = value;
-                    })
+                    bar = value;
                 };
 
                 spyOn(foo, "setBar").and.throwError("quux");
@@ -647,7 +634,7 @@ public class JasmineTests : JasmineSuite
             {
                 expect(new Action(() =>
                 {
-                    foo.setBar("123");
+                    foo["setBar"]("123");
                 })).toThrowError("quux");
             });
         });
@@ -659,18 +646,16 @@ public class JasmineTests : JasmineSuite
         */
         describe("A spy", () =>
         {
-            var foo = new { setBar = (Action<double?>)null };
+            JsDictionary<string, Action<double?>> foo = new JsDictionary<string, Action<double?>>();
+            foo["setBar"] = null;
             double? bar = null;
             Spy spy = null;
 
             beforeEach(() =>
             {
-                foo = new
+                foo["setBar"] = (value) =>
                 {
-                    setBar = new Action<double?>((value) =>
-                    {
-                        bar = value;
-                    })
+                    bar = value;
                 };
 
                 spy = spyOn(foo, "setBar").and.callThrough();
@@ -678,13 +663,13 @@ public class JasmineTests : JasmineSuite
 
             it("can call through and then stub in the same spec", () =>
             {
-                foo.setBar(123);
+                foo["setBar"](123);
                 expect(bar).toEqual(123);
 
                 spy.and.stub();
                 bar = null;
 
-                foo.setBar(123);
+                foo["setBar"](123);
                 expect(bar).toBe(null);
             });
         });
@@ -696,18 +681,17 @@ public class JasmineTests : JasmineSuite
         */
         describe("A spy", () =>
         {
-            var foo = new { setBar = (Action<double?>)null };
+
+            JsDictionary<string, Action<double?>> foo = new JsDictionary<string, Action<double?>>();
+            foo["setBar"] = null;
             double? bar = null;
             Spy fooSetBar = null;
 
             beforeEach(() =>
             {
-                foo = new
+                foo["setBar"] = (value) =>
                 {
-                    setBar = new Action<double?>((value) =>
-                    {
-                        bar = value;
-                    })
+                    bar = value;
                 };
 
                 fooSetBar = spyOn(foo, "setBar");
@@ -720,7 +704,7 @@ public class JasmineTests : JasmineSuite
             {
                 expect(fooSetBar.calls.any()).toEqual(false);
 
-                foo.setBar(0);
+                foo["setBar"](0);
 
                 expect(fooSetBar.calls.any()).toEqual(true);
             });
@@ -732,8 +716,8 @@ public class JasmineTests : JasmineSuite
             {
                 expect(fooSetBar.calls.count()).toEqual(0);
 
-                foo.setBar(0);
-                foo.setBar(0);
+                foo["setBar"](0);
+                foo["setBar"](0);
 
                 expect(fooSetBar.calls.count()).toEqual(2);
             });
@@ -743,8 +727,8 @@ public class JasmineTests : JasmineSuite
              */
             it("tracks the arguments of each call", () =>
             {
-                foo.setBar(123);
-                foo.setBar(456);
+                foo["setBar"](123);
+                foo["setBar"](456);
 
                 expect(fooSetBar.calls.argsFor(0)).toEqual(new[] { 123 });
                 expect(fooSetBar.calls.argsFor(1)).toEqual(new[] { 456 });
@@ -755,8 +739,8 @@ public class JasmineTests : JasmineSuite
              */
             it("tracks the arguments of all calls", () =>
             {
-                foo.setBar(123);
-                foo.setBar(456);
+                foo["setBar"](123);
+                foo["setBar"](456);
 
                 expect(fooSetBar.calls.allArgs()).toEqual(new[] { new[] { 123 }, new[] { 456 } });
             });
@@ -765,69 +749,67 @@ public class JasmineTests : JasmineSuite
              * `.calls.all()`: returns the context (the `this`) and arguments passed all calls
              */
             it("can provide the context and arguments to all calls", () =>
-          {
-              foo.setBar(123);
+            {
+                foo["setBar"](123);
 
-              expect(fooSetBar.calls.all()).toEqual(new[] { new { @object = foo, args = new[] { 123 }, returnValue = Script.Undefined } });
-          });
+                expect(fooSetBar.calls.all()).toEqual(new[] { new { @object = foo, args = new[] { 123 }, returnValue = Script.Undefined } });
+            });
 
             /**
              * `.calls.mostRecent()`: returns the context (the `this`) and arguments for the most recent call
              */
             it("has a shortcut to the most recent call", () =>
-          {
-              foo.setBar(123);
-              foo.setBar(456);
+            {
+                foo["setBar"](123);
+                foo["setBar"](456);
 
-              expect(fooSetBar.calls.mostRecent()).toEqual(new { @object = foo, args = new[] { 456 }, returnValue = Script.Undefined });
-          });
+                expect(fooSetBar.calls.mostRecent()).toEqual(new { @object = foo, args = new[] { 456 }, returnValue = Script.Undefined });
+            });
 
             /**
              * `.calls.first()`: returns the context (the `this`) and arguments for the first call
              */
             it("has a shortcut to the first call", () =>
-          {
-              foo.setBar(123);
-              foo.setBar(456);
+            {
+                foo["setBar"](123);
+                foo["setBar"](456);
 
-              expect(fooSetBar.calls.first()).toEqual(new { @object = foo, args = new[] { 123 }, returnValue = Script.Undefined });
-          });
+                expect(fooSetBar.calls.first()).toEqual(new { @object = foo, args = new[] { 123 }, returnValue = Script.Undefined });
+            });
 
             /**
              * When inspecting the return from `all()`, `mostRecent()` and `first()`, the `object` property is set to the value of `this` when the spy was called.
              */
             it("tracks the context", () =>
-          {
-              Spy spy = createSpy("spy");
-              var baz = new
-              {
-                  fn = spy
-              };
-              var quux = new
-              {
-                  fn = spy
-              };
-              baz.fn.Call(123);
-              quux.fn.Call(456);
+            {
+                Spy spy = createSpy("spy");
 
-              expect(spy.calls.first().Object).toBe(baz);
-              expect(spy.calls.mostRecent().Object).toBe(quux);
-          });
+                JsDictionary<string, Spy> baz = new JsDictionary<string, Spy>();
+                JsDictionary<string, Spy> quux = new JsDictionary<string, Spy>();
+
+                baz["fn"] = spy;
+                quux["fn"] = spy;
+                baz["fn"].Call(123);
+                quux["fn"].Call(456);
+
+                expect(spy.calls.first().Object).toBe(baz);
+                expect(spy.calls.mostRecent().Object).toBe(quux);
+            });
 
             /**
              * `.calls.reset()`: clears all tracking for a spy
              */
             it("can be reset", () =>
-          {
-              foo.setBar(123);
-              foo.setBar(456);
+            {
+                foo["setBar"](123);
+                foo["setBar"](456);
 
-              expect(fooSetBar.calls.any()).toBe(true);
+                expect(fooSetBar.calls.any()).toBe(true);
 
-              fooSetBar.calls.reset();
+                fooSetBar.calls.reset();
 
-              expect(fooSetBar.calls.any()).toBe(false);
-          });
+                expect(fooSetBar.calls.any()).toBe(false);
+            });
         });
 
         /**
@@ -932,7 +914,7 @@ public class JasmineTests : JasmineSuite
             {
                 it("is useful for comparing arguments", () =>
                 {
-                    var foo = createSpy("foo");
+                    Spy foo = createSpy("foo");
                     foo.Call(12, new Func<bool>(() => true));
 
                     expect(foo).toHaveBeenCalledWith(any(typeof(Double)), any(typeof(Function)));
@@ -947,16 +929,18 @@ public class JasmineTests : JasmineSuite
 
         describe("jasmine.objectContaining", () =>
         {
-            var foo = new { a = 0, b = 0, bar = "" };
+            JsDictionary foo = new JsDictionary();
+
+            foo["a"] = 0;
+            foo["b"] = 0;
+            foo["bar"] = "";
 
             beforeEach(() =>
             {
-                foo = new
-                {
-                    a = 1,
-                    b = 2,
-                    bar = "baz"
-                };
+
+                foo["a"] = 1;
+                foo["b"] = 2;
+                foo["bar"] = "baz";
             });
 
             it("matches objects with the expect key/value pairs", () =>
@@ -1089,9 +1073,10 @@ public class JasmineTests : JasmineSuite
             {
                 value++;
                 expect(value).toBeGreaterThan(0);
-                
-                
-                Task.Delay(1).ContinueWith((T) => {
+
+
+                Task.Delay(1).ContinueWith((T) =>
+                {
                     value = 1;
                     expect(value).toBeGreaterThan(0);
                     done();
@@ -1117,7 +1102,7 @@ public class JasmineTests : JasmineSuite
                 {
                     Window.SetTimeout(() =>
                     {
-                       done();
+                        done();
                     }, 90);
                 });
 
@@ -1142,19 +1127,19 @@ public class JasmineTests : JasmineSuite
          */
         JsDictionary<string, Func<ICustomMatcherUtil, object, CustomMatcher<string>>> customMatchers =
             new JsDictionary<string, Func<ICustomMatcherUtil, object, CustomMatcher<string>>>();
-        
-            /**
-            * ## Matcher Factories
-            *
-            * Custom matcher factories are passed two parameters: `util`, which has a set of utility functions for matchers to use (see: [`matchersUtil.js`][mu.js] for the current list) and `customEqualityTesters` which needs to be passed in if `util.equals` is ever called. These parameters are available for use when then matcher is called.
-            *
-            * [mu.js]: https://github.com/pivotal/jasmine/blob/master/src/core/matchers/matchersUtil.js
-            */
-            /**
-            * The factory method should return an object with a `compare` function that will be called to check the expectation.
-            */
+
+        /**
+        * ## Matcher Factories
+        *
+        * Custom matcher factories are passed two parameters: `util`, which has a set of utility functions for matchers to use (see: [`matchersUtil.js`][mu.js] for the current list) and `customEqualityTesters` which needs to be passed in if `util.equals` is ever called. These parameters are available for use when then matcher is called.
+        *
+        * [mu.js]: https://github.com/pivotal/jasmine/blob/master/src/core/matchers/matchersUtil.js
+        */
+        /**
+        * The factory method should return an object with a `compare` function that will be called to check the expectation.
+        */
         customMatchers["toBeGoofy"] = (util, customEqualityTesters) => new ToBeGoofy(util, customEqualityTesters);
-        
+
 
         /**
         * ### Custom negative comparators
@@ -1170,7 +1155,8 @@ public class JasmineTests : JasmineSuite
             /**
              * Register the custom matchers with Jasmine. All properties on the object passed in will be available as custom matchers (e.g., in this case `toBeGoofy`).
              */
-            beforeEach(() => {
+            beforeEach(() =>
+            {
                 addMatchers(customMatchers);
             });
 
@@ -1205,12 +1191,14 @@ public class JasmineTests : JasmineSuite
         /**
         * ## Custom Equality Testers
         */
-        describe("custom equality", () => {
+        describe("custom equality", () =>
+        {
             /**
              * You can customize how jasmine determines if two objects are equal by defining your own custom equality testers.
              * A custom equality tester is a function that takes two arguments.
              */
-            var myCustomEquality = new Func<string, string, bool>((first, second) => {
+            Func<string, string, bool> myCustomEquality = (first, second) =>
+            {
                 /**
                  * If the custom equality tester knows how to compare the two items, it should return either true or false
                  */
@@ -1225,26 +1213,29 @@ public class JasmineTests : JasmineSuite
                 /**
                  * Otherwise, it should return undefined, to tell jasmine's equality tester that it can't compare the items
                  */
-            });
+            };
 
             /**
              * Then you register your tester in a `beforeEach` so jasmine knows about it.
              */
-            beforeEach(() => {
+            beforeEach(() =>
+            {
                 addCustomEqualityTester(myCustomEquality);
             });
 
             /**
              * Then when you do comparisons in a spec, custom equality testers will be checked first before the default equality logic.
              */
-            it("should be custom equal", () => {
+            it("should be custom equal", () =>
+            {
                 expect("abc").toEqual("aaa");
             });
 
             /**
              * If your custom tester returns false, no other equality checking will be done.
              */
-            it("should be custom not equal", () => {
+            it("should be custom not equal", () =>
+            {
                 expect("abc").not.toEqual("abc");
             });
         });
@@ -1259,24 +1250,27 @@ public class JasmineTests : JasmineSuite
          * A jasmine reporter is just an object with the right functions available.
          * None of the functions here are required when creating a custom reporter, any that are not specified on your reporter will just be ignored.
          */
-        JsApiReporter myReporter = new JsApiReporter(){
+        JsApiReporter myReporter = new JsApiReporter()
+        {
             /**
              * ### jasmineStarted
              *
              * `jasmineStarted` is called after all of the specs have been loaded, but just before execution starts.
              */
-            jasmineStarted = (suiteInfo) => {
-            /**
-             * suiteInfo contains a property that tells how many specs have been defined
-             */
+            jasmineStarted = (suiteInfo) =>
+            {
+                /**
+                 * suiteInfo contains a property that tells how many specs have been defined
+                 */
                 Console.WriteLine("Running suite with " + suiteInfo.totalSpecsDefined);
             },
-          /**
-           * ### suiteStarted
-           *
-           * `suiteStarted` is invoked when a `describe` starts to run
-           */
-            suiteStarted = (result) => {
+            /**
+             * ### suiteStarted
+             *
+             * `suiteStarted` is invoked when a `describe` starts to run
+             */
+            suiteStarted = (result) =>
+            {
                 /**
                  * the result contains some meta data about the suite itself.
                  */
@@ -1287,7 +1281,8 @@ public class JasmineTests : JasmineSuite
             *
             * `specStarted` is invoked when an `it` starts to run (including associated `beforeEach` functions)
             */
-            specStarted = (result) => {
+            specStarted = (result) =>
+            {
                 /**
                     * the result contains some meta data about the spec itself.
                     */
@@ -1300,7 +1295,8 @@ public class JasmineTests : JasmineSuite
             *
             * While jasmine doesn't require any specific functions, not defining a `specDone` will make it impossible for a reporter to know when a spec has failed.
             */
-            specDone = (result) => {
+            specDone = (result) =>
+            {
                 /**
                     * The result here is the same object as in `specStarted` but with the addition of a status and a list of failedExpectations.
                     */
@@ -1321,7 +1317,8 @@ public class JasmineTests : JasmineSuite
             *
             * While jasmine doesn"t require any specific functions, not defining a `suiteDone` will make it impossible for a reporter to know when a suite has failures in an `afterAll`.
             */
-            suiteDone = (result) => {
+            suiteDone = (result) =>
+            {
                 /**
                 * The result here is the same object as in `suiteStarted` but with the addition of a status and a list of failedExpectations.
                 */
@@ -1341,7 +1338,8 @@ public class JasmineTests : JasmineSuite
             *
             * When the entire suite has finished execution `jasmineDone` is called
             */
-            jasmineDone = () => {
+            jasmineDone = () =>
+            {
                 Console.WriteLine("Finished suite");
             }
         };
@@ -1356,12 +1354,15 @@ public class JasmineTests : JasmineSuite
          */
         describe("Top Level suite", () =>
         {
-            it("spec", () => {
+            it("spec", () =>
+            {
                 expect(1).toBe(1);
             });
 
-            describe("Nested suite", () => {
-                it("nested spec", () => {
+            describe("Nested suite", () =>
+            {
+                it("nested spec", () =>
+                {
                     expect(true).toBe(true);
                 });
             });
@@ -1428,7 +1429,8 @@ public class JasmineTests : JasmineSuite
         *
         * The compare function receives the value passed to `expect()` as the first argument - the actual - and the value (if any) passed to the matcher itself as second argument.
         */
-        public override MatcherResult Compare(object actual, string expected) {
+        public override MatcherResult Compare(object actual, string expected)
+        {
 
             /**
                 * `toBeGoofy` takes an optional `expected` argument, so define it here if not passed in.
