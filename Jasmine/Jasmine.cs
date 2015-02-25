@@ -50,31 +50,42 @@ namespace Jasmine
 
         [IntrinsicProperty]
         public Matchers not { get { return null; } }
-
-        // any matcher
+        
         public IAny Any;
 
         // typeof matcher?
     }
+
+    [Imported]
+    public interface ICustomMatcher
+    {
+        //can't make a compare method here as an classes that implement the generic will complain that they don't implement the non-generic compare
+    }
+
+    [Imported]
+    public interface ICustomMatcher<in T> : ICustomMatcher
+    {
+       IMatcherResult compare(object actual, T expect);
+    }
+
+    [Imported]
+    public interface IMatcherResult
+    {
+        // To return custom matcher results, you need to implement a class such as the one below and use it as the return type of the compare method in the matcher
+        //[PreserveMemberCase(false)]
+        //public class MatcherResult : IMatcherResult
+        //{
+        //    public bool Pass;
+        //    public string Message;
+
+        //    public MatcherResult(bool pass, string message)
+        //    {
+        //        Pass = pass;
+        //        Message = message;
+        //    }
+        //}
+    }
     
-    public interface ICustomMatcher<in T>
-    {
-        MatcherResult Compare(object actual, T expect);
-    }
-
-    [PreserveMemberCase(false)]
-    public class MatcherResult
-    {
-        public bool Pass;
-        public string Message;
-
-        public MatcherResult(bool pass, string message)
-        {
-            Pass = pass;
-            Message = message;
-        }
-    }
-
     
     public interface ICustomMatcherUtil
     {
@@ -268,7 +279,7 @@ namespace Jasmine
         }
 
         [InlineCode("jasmine.addMatchers({matcher})")]
-        public static void addMatchers(JsDictionary<string, Func<ICustomMatcherUtil, object, ICustomMatcher<string>>> matcher) { }
+        public static void addMatchers(JsDictionary<string, Func<ICustomMatcherUtil, object, ICustomMatcher>> matcher) { }
 
         [InlineCode("jasmine.addCustomEqualityTester({customEquality})")]
         public static void addCustomEqualityTester(object customEquality) { }
@@ -386,7 +397,7 @@ namespace Jasmine
         {
             return 0;
         }
-        public void addReporter(Reporter reporter) { }
+        public void addReporter(IJsApiReporter reporter) { }
         public void execute() { }
         public Suite describe(string description, Action specDefinitions)
         {
@@ -459,15 +470,17 @@ namespace Jasmine
     }
 
     [Imported]
-    public class Result
+    public abstract class Result
     {
         protected Result() {}
         public string type;
     }
 
     [Imported]
-    public class NestedResults : Result
+    public sealed class NestedResults : Result
     {
+        private NestedResults() { }
+
         string description;
 
         public int totalCount;
@@ -490,16 +503,20 @@ namespace Jasmine
         }
     }
 
-    [Imported]
-    public class MessageResult : Result
+    [Imported] 
+    public sealed class MessageResult : Result
     {
+        private MessageResult() { }
+
         public object values;
         public Trace trace;
     }
 
     [Imported]
-    public class ExpectationResult : Result
+    public sealed class ExpectationResult : Result
     {
+        private ExpectationResult() { }
+
         public string matcherName;
 
         public bool passed()
@@ -571,21 +588,22 @@ namespace Jasmine
             return null;
         }
     }
-    
-    public class Reporter
+
+    [Imported]
+    public interface IReporter
     {
-        public void reportRunnerStarting(IRunner runner) { }
-        public void reportRunnerResults(IRunner runner) { }
-        public void reportSuiteResults(Suite suite) { }
-        public void reportSpecStarting(Spec spec) { }
-        public void reportSpecResults(Spec spec) { }
-        public void log(string str) { }
+        void reportRunnerStarting(IRunner runner);
+        void reportRunnerResults(IRunner runner);
+        void reportSuiteResults(Suite suite);
+        void reportSpecStarting(Spec spec);
+        void reportSpecResults(Spec spec);
+        void log(string str);
     }
 
     [Imported]
-    public class MultiReporter : Reporter
+    public interface IMultiReporter : IReporter
     {
-        public void addReporter(Reporter reporter) { }
+        void addReporter(IReporter reporter);
     }
 
     [Imported]
@@ -607,7 +625,7 @@ namespace Jasmine
         NestedResults results();
     }
     
-    public delegate void SpecFunction(Spec spec = null); //TODO overload?
+    public delegate void SpecFunction(Spec spec = null);
 
     [Imported]
     public class SuiteOrSpec
@@ -777,72 +795,38 @@ namespace Jasmine
         public object[] Args;
         public object Object;
     }
-    
-    public class JsApiReporter : Reporter
+
+    [Imported]
+    public interface IJsApiReporter
     {
-
-        public bool started;
-        public bool finished;
-        public object result;
-        public object messages;
-
-        public Action<IReporterSuiteInfo> jasmineStarted;
-        public Action jasmineDone;
-        public Action<IReporterResult> suiteStarted;
-        public Action<IReporterResult> suiteDone;
-        public Action<IReporterResult> specStarted;
-        public Action<IReporterResult> specDone;
-
-        public JsApiReporter() { }
-
-        public Suite[] suites()
-        {
-            return null;
-        }
-        public object summarize_(SuiteOrSpec suiteOrSpec)
-        {
-            return null;
-        }
-        public object results()
-        {
-            return null;
-        }
-        public object resultsForSpec(object specId)
-        {
-            return null;
-        }
-        public object log(object str)
-        {
-            return null;
-        }
-        public object resultsForSpecs(object specIds)
-        {
-            return null;
-        }
-        public object summarizeResult_(object result)
-        {
-            return null;
-        }
+        void jasmineStarted(ReporterSuiteInfo suiteInfo);
+        void jasmineDone();
+        void suiteStarted(ReporterResult result);
+        void suiteDone(ReporterResult result);
+        void specDone(ReporterResult result);
     }
 
     [PreserveMemberCase]
-    public class IReporterSuiteInfo
+    [Imported]
+    public sealed class ReporterSuiteInfo
     {
         public int totalSpecsDefined;
     }
 
     [PreserveMemberCase]
-    public class IReporterResult
+    [Imported]
+    public sealed class ReporterResult
     {
         public int id;
         public string fullName;
         public string description;
         public string status;
-        public IReporterError[] failedExpectations;
+        public ReporterError[] failedExpectations;
     }
 
     [PreserveMemberCase]
-    public class IReporterError
+    [Imported]
+    public sealed class ReporterError
     {
         public int id;
         public string stack;

@@ -495,7 +495,7 @@ public class JasmineTests : JasmineSuite
                 });
                 foo["getBar"] = new Func<string>(() => bar);
 
-                spy =spyOn(foo, "getBar").and.callThrough();
+                spy = spyOn(foo, "getBar").and.callThrough();
 
                 ((Action<string>)foo["setBar"])("123");
                 fetchedBar = ((Func<string>)foo["getBar"])();
@@ -1062,7 +1062,7 @@ public class JasmineTests : JasmineSuite
                 {
                     value = 0;
                     done();
-                }, 1);
+                }, 1000);
             });
 
             /**
@@ -1095,7 +1095,7 @@ public class JasmineTests : JasmineSuite
                 beforeEach(() =>
                 {
                     originalTimeout = DEFAULT_TIMEOUT_INTERVAL;
-                    DEFAULT_TIMEOUT_INTERVAL = 100;
+                    DEFAULT_TIMEOUT_INTERVAL = 1000;
                 });
 
                 it("takes a long time", (done) =>
@@ -1103,7 +1103,7 @@ public class JasmineTests : JasmineSuite
                     Window.SetTimeout(() =>
                     {
                         done();
-                    }, 90);
+                    }, 900);
                 });
 
                 afterEach(() =>
@@ -1125,8 +1125,8 @@ public class JasmineTests : JasmineSuite
         /**
          * This object has a custom matcher named "toBeGoofy".
          */
-        JsDictionary<string, Func<ICustomMatcherUtil, object, ICustomMatcher<string>>> customMatchers =
-            new JsDictionary<string, Func<ICustomMatcherUtil, object, ICustomMatcher<string>>>();
+        JsDictionary<string, Func<ICustomMatcherUtil, object, ICustomMatcher>> customMatchers =
+            new JsDictionary<string, Func<ICustomMatcherUtil, object, ICustomMatcher>>();
 
         /**
         * ## Matcher Factories
@@ -1139,6 +1139,7 @@ public class JasmineTests : JasmineSuite
         * The factory method should return an object with a `compare` function that will be called to check the expectation.
         */
         customMatchers["toBeGoofy"] = (util, customEqualityTesters) => new ToBeGoofy(util, customEqualityTesters);
+        customMatchers["toBeDivisibleBy"] = (util, customEqualityTesters) => new ToBeDivisibleBy(util, customEqualityTesters);
 
 
         /**
@@ -1168,7 +1169,7 @@ public class JasmineTests : JasmineSuite
                 expect(new
                 {
                     hyuk = "gawrsh"
-                }).toBeGoofy(); //extension method
+                }).toBeGoofy();
             });
 
             it("can take an 'expected' parameter", () =>
@@ -1185,6 +1186,24 @@ public class JasmineTests : JasmineSuite
                 {
                     hyuk = "this is fun"
                 }).not.toBeGoofy();
+            });
+        });
+
+        describe("Custom matcher: 'toBeDivisibleBy'", () =>
+        {
+            beforeEach(() =>
+            {
+                addMatchers(customMatchers);
+            });
+
+            it("is available on an expectation", () =>
+            {
+                expect(7).toBeDivisibleBy(7);
+            });
+
+            it("can be negated", () =>
+            {
+                expect(8).not.toBeDivisibleBy(7);
             });
         });
 
@@ -1250,99 +1269,8 @@ public class JasmineTests : JasmineSuite
          * A jasmine reporter is just an object with the right functions available.
          * None of the functions here are required when creating a custom reporter, any that are not specified on your reporter will just be ignored.
          */
-        JsApiReporter myReporter = new JsApiReporter()
-        {
-            /**
-             * ### jasmineStarted
-             *
-             * `jasmineStarted` is called after all of the specs have been loaded, but just before execution starts.
-             */
-            jasmineStarted = (suiteInfo) =>
-            {
-                /**
-                 * suiteInfo contains a property that tells how many specs have been defined
-                 */
-                Console.WriteLine("Running suite with " + suiteInfo.totalSpecsDefined);
-            },
-            /**
-             * ### suiteStarted
-             *
-             * `suiteStarted` is invoked when a `describe` starts to run
-             */
-            suiteStarted = (result) =>
-            {
-                /**
-                 * the result contains some meta data about the suite itself.
-                 */
-                Console.WriteLine("Suite started: " + result.description + " whose full description is: " + result.fullName);
-            },
-            /**
-            * ### specStarted
-            *
-            * `specStarted` is invoked when an `it` starts to run (including associated `beforeEach` functions)
-            */
-            specStarted = (result) =>
-            {
-                /**
-                    * the result contains some meta data about the spec itself.
-                    */
-                Console.WriteLine("Spec started: " + result.description + " whose full description is: " + result.fullName);
-            },
-            /**
-            * ### specDone
-            *
-            * `specDone` is invoked when an `it` and its associated `beforeEach` and `afterEach` functions have been run.
-            *
-            * While jasmine doesn't require any specific functions, not defining a `specDone` will make it impossible for a reporter to know when a spec has failed.
-            */
-            specDone = (result) =>
-            {
-                /**
-                    * The result here is the same object as in `specStarted` but with the addition of a status and a list of failedExpectations.
-                    */
-                Console.WriteLine("Spec: " + result.description + " was " + result.status);
-                for (var i = 0; i < result.failedExpectations.Length; i++)
-                {
-                    /**
-                    * Each `failedExpectation` has a message that describes the failure and a stack trace.
-                    */
-                    Console.WriteLine("Failure: " + result.failedExpectations[i].message);
-                    Console.WriteLine(result.failedExpectations[i].stack);
-                }
-            },
-            /**
-            * ### suiteDone
-            *
-            * `suiteDone` is invoked when all of the child specs and suites for a given suite have been run
-            *
-            * While jasmine doesn"t require any specific functions, not defining a `suiteDone` will make it impossible for a reporter to know when a suite has failures in an `afterAll`.
-            */
-            suiteDone = (result) =>
-            {
-                /**
-                * The result here is the same object as in `suiteStarted` but with the addition of a status and a list of failedExpectations.
-                */
-                Console.WriteLine("Suite: " + result.description + " was " + result.status);
-                for (var i = 0; i < result.failedExpectations.Length; i++)
-                {
-                    /**
-                    * Any `failedExpectation`s on the suite itself are the result of a failure in an `afterAll`.
-                    * Each `failedExpectation` has a message that describes the failure and a stack trace.
-                    */
-                    Console.WriteLine("AfterAll " + result.failedExpectations[i].message);
-                    Console.WriteLine(result.failedExpectations[i].stack);
-                }
-            },
-            /**
-            * ### jasmineDone
-            *
-            * When the entire suite has finished execution `jasmineDone` is called
-            */
-            jasmineDone = () =>
-            {
-                Console.WriteLine("Finished suite");
-            }
-        };
+
+        IJsApiReporter myReporter = new newReporter();
 
         /**
             * Register the reporter with jasmine
@@ -1429,7 +1357,7 @@ public class JasmineTests : JasmineSuite
         *
         * The compare function receives the value passed to `expect()` as the first argument - the actual - and the value (if any) passed to the matcher itself as second argument.
         */
-        public MatcherResult Compare(object actual, string expected)
+        public IMatcherResult compare(object actual, string expected)
         {
 
             /**
@@ -1439,7 +1367,7 @@ public class JasmineTests : JasmineSuite
             {
                 expected = "";
             }
-
+            
             /**
             * ### Result
             *
@@ -1462,20 +1390,74 @@ public class JasmineTests : JasmineSuite
                 /**
                 * The matcher succeeded, so the custom failure message should be present in the case of a negative expectation - when the expectation is used with `.not`.
                 */
-                resultMessage = "Expected " + actual + " not to be quite so goofy";
+                resultMessage = String.Format("Expected {0} not to be quite so goofy", actual);
             }
             else
             {
                 /**
                 * The matcher failed, so the custom failure message should be present in the case of a positive expectation
                 */
-                resultMessage = "Expected " + actual + " to be goofy, but it was not very goofy";
+                resultMessage = String.Format("Expected {0} to be goofy, but it was not very goofy", actual);
             }
 
             /**
             * Return the result of the comparison.
             */
             return new MatcherResult(resultPass, resultMessage);
+        }
+    }
+
+    public class ToBeDivisibleBy : ICustomMatcher<int>
+    {
+        public static ICustomMatcherUtil Util;
+        public static object CustomEqualityTesters;
+
+        public ToBeDivisibleBy(ICustomMatcherUtil util, object customEqualityTesters)
+        {
+            ToBeDivisibleBy.Util = util;
+            ToBeDivisibleBy.CustomEqualityTesters = customEqualityTesters;
+        }
+
+        public IMatcherResult compare(object actual, int expected)
+        {
+            bool resultPass = false;
+            string resultMessage = "";
+            var matcherResult = new MatcherResult(resultPass, resultMessage);
+
+            int? actualConvert = actual as int?;
+            if (actualConvert != null)
+            {
+                matcherResult.Pass = actualConvert.Value % expected == 0;
+            }
+            else
+            {
+                matcherResult.Message = String.Format("Expected {0} to be divisble by {1}, but it was not a number", actual, expected);
+                return matcherResult;
+            }
+
+            if (matcherResult.Pass)
+            {
+                matcherResult.Message = String.Format("Expected {0} not to be divisble by {1}", actual, expected);
+            }
+            else
+            {
+                matcherResult.Message = String.Format("Expected {0} to be divisble by {1}", actual, expected);
+            }
+
+            return matcherResult;
+        }
+    }
+
+    [PreserveMemberCase(false)]
+    public class MatcherResult : IMatcherResult
+    {
+        public bool Pass;
+        public string Message;
+
+        public MatcherResult(bool pass, string message)
+        {
+            Pass = pass;
+            Message = message;
         }
     }
 }
@@ -1492,5 +1474,105 @@ public static class MatcherExtensions
     public static bool toBeGoofy(this Matchers matcher, string expected)
     {
         return false;
+    }
+
+    [InstanceMethodOnFirstArgument]
+    public static bool toBeDivisibleBy(this Matchers matcher, int expected)
+    {
+        return false;
+    }
+}
+
+public class newReporter : IJsApiReporter
+{
+    /**
+             * ### jasmineStarted
+             *
+             * `jasmineStarted` is called after all of the specs have been loaded, but just before execution starts.
+             */
+    public void jasmineStarted(ReporterSuiteInfo suiteInfo)
+    {
+        /**
+         * suiteInfo contains a property that tells how many specs have been defined
+         */
+        Console.WriteLine("Running suite with " + suiteInfo.totalSpecsDefined);
+    }
+    /**
+     * ### suiteStarted
+     *
+     * `suiteStarted` is invoked when a `describe` starts to run
+     */
+    public void suiteStarted(ReporterResult result)
+    {
+        /**
+         * the result contains some meta data about the suite itself.
+         */
+        Console.WriteLine("Suite started: " + result.description + " whose full description is: " + result.fullName);
+    }
+    /**
+    * ### specStarted
+    *
+    * `specStarted` is invoked when an `it` starts to run (including associated `beforeEach` functions)
+    */
+    public void specStarted(ReporterResult result)
+    {
+        /**
+            * the result contains some meta data about the spec itself.
+            */
+        Console.WriteLine("Spec started: " + result.description + " whose full description is: " + result.fullName);
+    }
+    /**
+    * ### specDone
+    *
+    * `specDone` is invoked when an `it` and its associated `beforeEach` and `afterEach` functions have been run.
+    *
+    * While jasmine doesn't require any specific functions, not defining a `specDone` will make it impossible for a reporter to know when a spec has failed.
+    */
+    public void specDone(ReporterResult result)
+    {
+        /**
+            * The result here is the same object as in `specStarted` but with the addition of a status and a list of failedExpectations.
+            */
+        Console.WriteLine("Spec: " + result.description + " was " + result.status);
+        for (var i = 0; i < result.failedExpectations.Length; i++)
+        {
+            /**
+            * Each `failedExpectation` has a message that describes the failure and a stack trace.
+            */
+            Console.WriteLine("Failure: " + result.failedExpectations[i].message);
+            Console.WriteLine(result.failedExpectations[i].stack);
+        }
+    }
+    /**
+    * ### suiteDone
+    *
+    * `suiteDone` is invoked when all of the child specs and suites for a given suite have been run
+    *
+    * While jasmine doesn"t require any specific functions, not defining a `suiteDone` will make it impossible for a reporter to know when a suite has failures in an `afterAll`.
+    */
+    public void suiteDone(ReporterResult result)
+    {
+        /**
+        * The result here is the same object as in `suiteStarted` but with the addition of a status and a list of failedExpectations.
+        */
+        Console.WriteLine("Suite: " + result.description + " was " + result.status);
+        for (var i = 0; i < result.failedExpectations.Length; i++)
+        {
+            /**
+            * Any `failedExpectation`s on the suite itself are the result of a failure in an `afterAll`.
+            * Each `failedExpectation` has a message that describes the failure and a stack trace.
+            */
+            Console.WriteLine("AfterAll " + result.failedExpectations[i].message);
+            Console.WriteLine(result.failedExpectations[i].stack);
+        }
+    }
+    /**
+    * ### jasmineDone
+    *
+    * When the entire suite has finished execution `jasmineDone` is called
+    */
+    public void jasmineDone()
+    {
+        Console.WriteLine("Finished suite");
     }
 }
