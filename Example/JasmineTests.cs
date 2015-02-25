@@ -1125,8 +1125,8 @@ public class JasmineTests : JasmineSuite
         /**
          * This object has a custom matcher named "toBeGoofy".
          */
-        JsDictionary<string, Func<ICustomMatcherUtil, object, CustomMatcher<string>>> customMatchers =
-            new JsDictionary<string, Func<ICustomMatcherUtil, object, CustomMatcher<string>>>();
+        JsDictionary<string, Func<ICustomMatcherUtil, object, ICustomMatcher<string>>> customMatchers =
+            new JsDictionary<string, Func<ICustomMatcherUtil, object, ICustomMatcher<string>>>();
 
         /**
         * ## Matcher Factories
@@ -1413,7 +1413,7 @@ public class JasmineTests : JasmineSuite
 
     }
 
-    public class ToBeGoofy : CustomMatcher<string>
+    public class ToBeGoofy : ICustomMatcher<string>
     {
         public static ICustomMatcherUtil Util;
         public static object CustomEqualityTesters;
@@ -1429,7 +1429,7 @@ public class JasmineTests : JasmineSuite
         *
         * The compare function receives the value passed to `expect()` as the first argument - the actual - and the value (if any) passed to the matcher itself as second argument.
         */
-        public override MatcherResult Compare(object actual, string expected)
+        public MatcherResult Compare(object actual, string expected)
         {
 
             /**

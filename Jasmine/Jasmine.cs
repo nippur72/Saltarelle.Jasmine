@@ -56,11 +56,10 @@ namespace Jasmine
 
         // typeof matcher?
     }
-
-    [PreserveMemberCase(false)]
-    public abstract class CustomMatcher<T>
+    
+    public interface ICustomMatcher<in T>
     {
-        public abstract MatcherResult Compare(object actual, T expect);
+        MatcherResult Compare(object actual, T expect);
     }
 
     [PreserveMemberCase(false)]
@@ -269,7 +268,7 @@ namespace Jasmine
         }
 
         [InlineCode("jasmine.addMatchers({matcher})")]
-        public static void addMatchers(object matcher) { } //TODO: create a Matcher interface that is a function that return an object that has a compar node, which returns a result object 
+        public static void addMatchers(JsDictionary<string, Func<ICustomMatcherUtil, object, ICustomMatcher<string>>> matcher) { }
 
         [InlineCode("jasmine.addCustomEqualityTester({customEquality})")]
         public static void addCustomEqualityTester(object customEquality) { }
@@ -659,7 +658,7 @@ namespace Jasmine
         {
             return null;
         }
-        public Spec waitsFor(SpecFunction latchFunction, string timeoutMessage = null, int timeout = 0)//TODO overload?
+        public Spec waitsFor(SpecFunction latchFunction, string timeoutMessage = null, int timeout = 0)
         {
             return null;
         }
@@ -850,23 +849,3 @@ namespace Jasmine
         public string message;
     }
 }
-
-//public static class jasmine
-//{
-
-
-//    /*
-//    TODO:    
-    
-//    interface Jasmine
-//    {
-//        Spec: Spec;
-//        clock: Clock;
-//        util: IUtil;
-//    }
-
-//    export var HtmlReporter: HtmlReporter;
-//    export var HtmlSpecFilter: HtmlSpecFilter;
-//    export var DEFAULT_TIMEOUT_INTERVAL: number;
-//    */
-//}
