@@ -83,7 +83,8 @@ namespace Jasmine
         //    }
         //}
     }
-        
+    
+    [Imported]    
     public interface ICustomMatcherUtil
     {
         [PreserveName] string buildFailureMessage();

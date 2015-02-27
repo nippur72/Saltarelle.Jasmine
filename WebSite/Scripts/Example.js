@@ -48,7 +48,7 @@
 	$newReporter.__typeName = 'newReporter';
 	global.newReporter = $newReporter;
 	ss.initClass($JasmineTests, $asm, {
-		SpecRunner: function() {
+		SpecRunner1: function() {
 			describe('Pending specs', function() {
 				it("can be declared by calling 'pending' in the spec body", function() {
 					expect(true).toBe(false);
@@ -56,7 +56,7 @@
 				});
 			});
 		},
-		SpecRunner1: function() {
+		SpecRunner: function() {
 			describe('A suite', function() {
 				it('contains spec with an expectation', function() {
 					expect(true).toBe(true);
