@@ -52,8 +52,6 @@ namespace Jasmine
         public Matchers not { get { return null; } }
         
         public IAny Any;
-
-        // typeof matcher?
     }
 
     [Imported]
@@ -85,16 +83,12 @@ namespace Jasmine
         //    }
         //}
     }
-    
-    
+        
     public interface ICustomMatcherUtil
     {
-        [PreserveName]
-        string buildFailureMessage();
-        [PreserveName]
-        bool contains(object haystack, object needle, object customTesters);
-        [PreserveName]
-        bool equals(object a, object b, object customTesters);
+        [PreserveName] string buildFailureMessage();
+        [PreserveName] bool contains(object haystack, object needle, object customTesters);
+        [PreserveName] bool equals(object a, object b, object customTesters);
     }
 
     [Imported]
@@ -295,7 +289,6 @@ namespace Jasmine
         [Imported]
         public static class Util
         {
-
             public static object argsToArray(object args)
             {
                 return null;
@@ -322,23 +315,23 @@ namespace Jasmine
             }
         }
         
-        public static double DEFAULT_TIMEOUT_INTERVAL {
+        public static double DEFAULT_TIMEOUT_INTERVAL 
+        {
             [InlineCode("jasmine.DEFAULT_TIMEOUT_INTERVAL")]
             get { return 5000; }
             [InlineCode("jasmine.DEFAULT_TIMEOUT_INTERVAL = {value}")]
-            set {}}
-
+            set { }
         }
+    }
 
     [Imported]
     public class Clock
     {
-        public void install() { }
-        
-        public void uninstall() { }
-        
+        public void install() { }        
+        public void uninstall() { }        
         public void tick(int ms) { }
     }
+
     [Imported]
     public interface IAny
     {
@@ -647,7 +640,6 @@ namespace Jasmine
     [Imported]
     public class Spec : SuiteOrSpec
     {
-
         private Spec(Env env, Suite suite, string description) { }
 
         public Suite suite;
@@ -728,7 +720,6 @@ namespace Jasmine
     [Imported]
     public class Suite : SuiteOrSpec
     {
-
         private Suite(Env env, string description, Action specDefinitions, Suite parentSuite) { }
 
         public Suite parentSuite;
@@ -813,15 +804,13 @@ namespace Jasmine
         void suiteDone(ReporterResult result);
         void specDone(ReporterResult result);
     }
-
-    [PreserveMemberCase]
+    
     [Imported]
     public sealed class ReporterSuiteInfo
     {
         public int totalSpecsDefined;
     }
 
-    [PreserveMemberCase]
     [Imported]
     public sealed class ReporterResult
     {
@@ -832,7 +821,6 @@ namespace Jasmine
         public ReporterError[] failedExpectations;
     }
 
-    [PreserveMemberCase]
     [Imported]
     public sealed class ReporterError
     {
