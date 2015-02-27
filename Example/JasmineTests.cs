@@ -11,21 +11,19 @@ using Jasmine;
 
 public class JasmineTests : JasmineSuite
 {
-    public void SpecRunner1()
+    public void SpecRunner()
     {
-        /*
-        describe("generic",()=>
+        describe("Pending specs", () =>
         {
-           it("assigments should work",()=>
-           {
-              var a=5;
-              expect(a).not.toBe(6);
-           });   
-        });    
-        */
+            it("can be declared by calling 'pending' in the spec body", () =>
+            {                
+                expect(true).toBe(false);                
+                pending("this is why it is pending");
+            });
+        });
     }
 
-    public void SpecRunner()
+    public void SpecRunner1()
     {
 
         /**
@@ -385,29 +383,28 @@ public class JasmineTests : JasmineSuite
         Pending specs do not run, but their names will show up in the results as `pending`.
         */
         //TODO: Pending() doesn't work in PhantomJS
-        //describe("Pending specs", () =>
-        //{
+        describe("Pending specs", () =>
+        {
+            /** Any spec declared with `xit` is marked as pending.
+             */
+            xit("can be declared 'xit'", () =>
+            {
+                expect(true).toBe(false);
+            });
 
-        //    /** Any spec declared with `xit` is marked as pending.
-        //     */
-        //    xit("can be declared 'xit'", () =>
-        //    {
-        //        expect(true).toBe(false);
-        //    });
+            /** Any spec declared without a function body will also be marked pending in results.
+             */
 
-        //    /** Any spec declared without a function body will also be marked pending in results.
-        //     */
+            it("can be declared with 'it' but without a function");
 
-        //    it("can be declared with 'it' but without a function");
-
-        //    /** And if you call the function `pending` anywhere in the spec body, no matter the expectations, the spec will be marked pending.
-        //     */
-        //    it("can be declared by calling 'pending' in the spec body", () =>
-        //    {
-        //        expect(true).toBe(false);
-        //        pending();
-        //    });
-        //});
+            /** And if you call the function `pending` anywhere in the spec body, no matter the expectations, the spec will be marked pending.
+             */
+            it("can be declared by calling 'pending' in the spec body", () =>
+            {                
+                expect(true).toBe(false);                
+                pending("this is why it is pending");
+            });
+        });
 
         /**
          ## Spies

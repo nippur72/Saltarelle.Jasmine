@@ -48,25 +48,15 @@
 	$newReporter.__typeName = 'newReporter';
 	global.newReporter = $newReporter;
 	ss.initClass($JasmineTests, $asm, {
-		SpecRunner1: function() {
-			//
-			//        describe("generic",()=>
-			//
-			//        {
-			//
-			//        it("assigments should work",()=>
-			//
-			//        {
-			//
-			//        var a=5;
-			//
-			//        expect(a).not.toBe(6);
-			//
-			//        });
-			//
-			//        });
-		},
 		SpecRunner: function() {
+			describe('Pending specs', function() {
+				it("can be declared by calling 'pending' in the spec body", function() {
+					expect(true).toBe(false);
+					pending('this is why it is pending');
+				});
+			});
+		},
+		SpecRunner1: function() {
 			describe('A suite', function() {
 				it('contains spec with an expectation', function() {
 					expect(true).toBe(true);
@@ -249,25 +239,16 @@
 				});
 			});
 			//TODO: Pending() doesn't work in PhantomJS
-			//describe("Pending specs", () =>
-			//{
-			//    /** Any spec declared with `xit` is marked as pending.
-			//     */
-			//    xit("can be declared 'xit'", () =>
-			//    {
-			//        expect(true).toBe(false);
-			//    });
-			//    /** Any spec declared without a function body will also be marked pending in results.
-			//     */
-			//    it("can be declared with 'it' but without a function");
-			//    /** And if you call the function `pending` anywhere in the spec body, no matter the expectations, the spec will be marked pending.
-			//     */
-			//    it("can be declared by calling 'pending' in the spec body", () =>
-			//    {
-			//        expect(true).toBe(false);
-			//        pending();
-			//    });
-			//});
+			describe('Pending specs', function() {
+				xit("can be declared 'xit'", function() {
+					expect(true).toBe(false);
+				});
+				it("can be declared with 'it' but without a function");
+				it("can be declared by calling 'pending' in the spec body", function() {
+					expect(true).toBe(false);
+					pending('this is why it is pending');
+				});
+			});
 			// TODO object containing a function
 			describe('A spy', function() {
 				var foo10 = {};

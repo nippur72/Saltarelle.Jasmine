@@ -130,6 +130,9 @@ namespace Jasmine
         [InlineCode("xdescribe({description},{specDefinitions})")]
         public static void xdescribe(string description, Action specDefinitions) { }
 
+        [InlineCode("it({desc})")]
+        public static void it(string desc) { }
+
         [InlineCode("it({desc},{func})")]
         public static void it(string desc, Action func) { }
 
@@ -159,6 +162,9 @@ namespace Jasmine
 
         [InlineCode("pending()")]
         public static void pending() { }
+
+        [InlineCode("pending({reason})")]
+        public static void pending(string reason) { }
 
         [InlineCode("expect({o})")]
         public static Matchers expect(object o) { return null; }
