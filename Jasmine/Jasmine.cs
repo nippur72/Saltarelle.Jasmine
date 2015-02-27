@@ -216,6 +216,8 @@ namespace Jasmine
         {
             return null;
         }
+
+        [InlineCode("jasmine.createSpy({name},{originalFunction})")]
         public static Jasmine.Spy createSpy(string name, Delegate originalFunction)
         {
             return null;
