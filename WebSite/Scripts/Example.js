@@ -3,12 +3,66 @@
 	var $asm = {};
 	ss.initAssembly($asm, 'Example');
 	////////////////////////////////////////////////////////////////////////////////
+	// JasmineTests.AnyPlus
+	var $$JasmineTests$AnyPlus = function(expectedObject) {
+		jasmine.Any.call(this, expectedObject);
+	};
+	$$JasmineTests$AnyPlus.__typeName = '$JasmineTests$AnyPlus';
+	////////////////////////////////////////////////////////////////////////////////
+	// JasmineTests.CallTrackerPlus
+	var $$JasmineTests$CallTrackerPlus = function() {
+		jasmine.CallTracker.call(this);
+	};
+	$$JasmineTests$CallTrackerPlus.__typeName = '$JasmineTests$CallTrackerPlus';
+	////////////////////////////////////////////////////////////////////////////////
+	// JasmineTests.ClockPlus
+	var $$JasmineTests$ClockPlus = function(global, delayedFunctionScheduler, mockDate) {
+		jasmine.Clock.call(this, global, delayedFunctionScheduler, mockDate);
+	};
+	$$JasmineTests$ClockPlus.__typeName = '$JasmineTests$ClockPlus';
+	////////////////////////////////////////////////////////////////////////////////
+	// JasmineTests.EnvPlus
+	var $$JasmineTests$EnvPlus = function(options) {
+		jasmine.Env.call(this, options);
+	};
+	$$JasmineTests$EnvPlus.__typeName = '$JasmineTests$EnvPlus';
+	////////////////////////////////////////////////////////////////////////////////
+	// JasmineTests.ObjectContainingPlus
+	var $$JasmineTests$ObjectContainingPlus = function(sample) {
+		jasmine.ObjectContaining.call(this, sample);
+	};
+	$$JasmineTests$ObjectContainingPlus.__typeName = '$JasmineTests$ObjectContainingPlus';
+	////////////////////////////////////////////////////////////////////////////////
+	// JasmineTests.SpecPlus
+	var $$JasmineTests$SpecPlus = function(attrs) {
+		jasmine.Spec.call(this, attrs);
+	};
+	$$JasmineTests$SpecPlus.__typeName = '$JasmineTests$SpecPlus';
+	////////////////////////////////////////////////////////////////////////////////
+	// JasmineTests.SpyStrategyPlus
+	var $$JasmineTests$SpyStrategyPlus = function(options) {
+		jasmine.SpyStrategy.call(this, options);
+	};
+	$$JasmineTests$SpyStrategyPlus.__typeName = '$JasmineTests$SpyStrategyPlus';
+	////////////////////////////////////////////////////////////////////////////////
+	// JasmineTests.SuitePlus
+	var $$JasmineTests$SuitePlus = function(attrs) {
+		jasmine.Suite.call(this, attrs);
+	};
+	$$JasmineTests$SuitePlus.__typeName = '$JasmineTests$SuitePlus';
+	////////////////////////////////////////////////////////////////////////////////
 	// JasmineTests
 	var $JasmineTests = function() {
 		ss.shallowCopy({}, this);
 	};
 	$JasmineTests.__typeName = 'JasmineTests';
 	global.JasmineTests = $JasmineTests;
+	////////////////////////////////////////////////////////////////////////////////
+	// JasmineTests.CustomMatchers
+	var $JasmineTests$CustomMatchers = function() {
+	};
+	$JasmineTests$CustomMatchers.__typeName = 'JasmineTests$CustomMatchers';
+	global.JasmineTests$CustomMatchers = $JasmineTests$CustomMatchers;
 	////////////////////////////////////////////////////////////////////////////////
 	// JasmineTests.MatcherResult
 	var $JasmineTests$MatcherResult = function(pass, message) {
@@ -19,22 +73,6 @@
 	};
 	$JasmineTests$MatcherResult.__typeName = 'JasmineTests$MatcherResult';
 	global.JasmineTests$MatcherResult = $JasmineTests$MatcherResult;
-	////////////////////////////////////////////////////////////////////////////////
-	// JasmineTests.ToBeDivisibleBy
-	var $JasmineTests$ToBeDivisibleBy = function(util, customEqualityTesters) {
-		$JasmineTests$ToBeDivisibleBy.Util = util;
-		$JasmineTests$ToBeDivisibleBy.CustomEqualityTesters = customEqualityTesters;
-	};
-	$JasmineTests$ToBeDivisibleBy.__typeName = 'JasmineTests$ToBeDivisibleBy';
-	global.JasmineTests$ToBeDivisibleBy = $JasmineTests$ToBeDivisibleBy;
-	////////////////////////////////////////////////////////////////////////////////
-	// JasmineTests.ToBeGoofy
-	var $JasmineTests$ToBeGoofy = function(util, customEqualityTesters) {
-		$JasmineTests$ToBeGoofy.Util = util;
-		$JasmineTests$ToBeGoofy.CustomEqualityTesters = customEqualityTesters;
-	};
-	$JasmineTests$ToBeGoofy.__typeName = 'JasmineTests$ToBeGoofy';
-	global.JasmineTests$ToBeGoofy = $JasmineTests$ToBeGoofy;
 	////////////////////////////////////////////////////////////////////////////////
 	// MatcherExtensions
 	var $MatcherExtensions = function() {
@@ -47,6 +85,46 @@
 	};
 	$newReporter.__typeName = 'newReporter';
 	global.newReporter = $newReporter;
+	ss.initClass($$JasmineTests$AnyPlus, $asm, {
+		$Test: function() {
+			return false;
+		}
+	}, jasmine.Any);
+	ss.initClass($$JasmineTests$CallTrackerPlus, $asm, {
+		$Test: function() {
+			return false;
+		}
+	}, jasmine.CallTracker);
+	ss.initClass($$JasmineTests$ClockPlus, $asm, {
+		$Test: function() {
+			return false;
+		}
+	}, jasmine.Clock);
+	ss.initClass($$JasmineTests$EnvPlus, $asm, {
+		$Test: function() {
+			return false;
+		}
+	}, jasmine.Env);
+	ss.initClass($$JasmineTests$ObjectContainingPlus, $asm, {
+		$Test: function() {
+			return false;
+		}
+	}, jasmine.ObjectContaining);
+	ss.initClass($$JasmineTests$SpecPlus, $asm, {
+		$Test: function() {
+			return false;
+		}
+	}, jasmine.Spec);
+	ss.initClass($$JasmineTests$SpyStrategyPlus, $asm, {
+		$Test: function() {
+			return false;
+		}
+	}, jasmine.SpyStrategy);
+	ss.initClass($$JasmineTests$SuitePlus, $asm, {
+		$Test: function() {
+			return false;
+		}
+	}, jasmine.Suite);
 	ss.initClass($JasmineTests, $asm, {
 		SpecRunner1: function() {
 			describe('Pending specs', function() {
@@ -630,15 +708,22 @@
 				});
 			});
 			var customMatchers = {};
-			customMatchers['toBeGoofy'] = function(util, customEqualityTesters) {
-				return new $JasmineTests$ToBeGoofy(util, customEqualityTesters);
-			};
-			customMatchers['toBeDivisibleBy'] = function(util1, customEqualityTesters1) {
-				return new $JasmineTests$ToBeDivisibleBy(util1, customEqualityTesters1);
-			};
+			customMatchers['toBeGoofy'] = $JasmineTests$CustomMatchers.ToBeGoofy;
 			describe("Custom matcher: 'toBeGoofy'", function() {
 				beforeEach(function() {
-					jasmine.addMatchers(customMatchers);
+					(function() {
+						var $m = customMatchers;
+						jasmine.addMatchers(Object.keys($m).reduce(function($acc, $key) {
+							$acc[$key] = function($u, $c) {
+								return {
+									compare: function($a, $e) {
+										return $m[$key]($u, $c, $a, $e);
+									}
+								};
+							};
+							return $acc;
+						}, {}));
+					})();
 				});
 				it('is available on an expectation', function() {
 					expect({ hyuk: 'gawrsh' }).toBeGoofy();
@@ -652,7 +737,17 @@
 			});
 			describe("Custom matcher: 'toBeDivisibleBy'", function() {
 				beforeEach(function() {
-					jasmine.addMatchers(customMatchers);
+					(function() {
+						var $n = 'toBeDivisibleBy', $m = $JasmineTests$CustomMatchers.ToBeDivisibleBy, $o = {};
+						$o[$n] = function($u, $c) {
+							return {
+								compare: function($a, $e) {
+									return $m($u, $c, $a, $e);
+								}
+							};
+						};
+						jasmine.addMatchers($o);
+					})();
 				});
 				it('is available on an expectation', function() {
 					expect(7).toBeDivisibleBy(7);
@@ -690,6 +785,42 @@
 					});
 				});
 			});
+			describe('Publicly exposed classes', function() {
+				it('can instantiate publicly exposed jasmine classes', function() {
+					expect(function() {
+						var a9 = new jasmine.Any(Object);
+						var s = jasmine.createSpy('mySpy');
+						var s2 = jasmine.createSpy();
+						var suite = new jasmine.Suite({});
+						var ct = new jasmine.CallTracker();
+						var c = new jasmine.Clock(new Object(), {}, null);
+						var oc = new jasmine.ObjectContaining({ propA: 5 });
+						var spec = new jasmine.Spec({ queueableFn: {} });
+						var e3 = new jasmine.Env(new Object());
+						var sc = new jasmine.SpyStrategy({});
+					}).not.toThrow();
+				});
+				it('can extend publicly exposed jasmine classes', function() {
+					expect(function() {
+						var ap = new $$JasmineTests$AnyPlus(String);
+						ap.$Test();
+						var cp = new $$JasmineTests$ClockPlus(new Object(), new Object(), null);
+						cp.$Test();
+						var ocp = new $$JasmineTests$ObjectContainingPlus(new Object());
+						ocp.$Test();
+						var sp = new $$JasmineTests$SuitePlus({});
+						sp.$Test();
+						var spp = new $$JasmineTests$SpecPlus({ queueableFn: {} });
+						spp.$Test();
+						var ep = new $$JasmineTests$EnvPlus({});
+						ep.$Test();
+						var ctp = new $$JasmineTests$CallTrackerPlus();
+						ctp.$Test();
+						var ssp = new $$JasmineTests$SpyStrategyPlus({});
+						ssp.$Test();
+					}).not.toThrow();
+				});
+			});
 			//describe("Focused specs", () => {
 			//    /** Any spec declared with `fit` is focused.
 			//     */
@@ -724,46 +855,8 @@
 			//});
 		}
 	}, Object);
+	ss.initClass($JasmineTests$CustomMatchers, $asm, {});
 	ss.initClass($JasmineTests$MatcherResult, $asm, {});
-	ss.initClass($JasmineTests$ToBeDivisibleBy, $asm, {
-		compare: function(actual, expected) {
-			var resultPass = false;
-			var resultMessage = '';
-			var matcherResult = new $JasmineTests$MatcherResult(resultPass, resultMessage);
-			var actualConvert = ss.safeCast(actual, ss.Int32);
-			if (ss.isValue(actualConvert)) {
-				matcherResult.pass = ss.unbox(actualConvert) % expected === 0;
-			}
-			else {
-				matcherResult.message = ss.formatString('Expected {0} to be divisble by {1}, but it was not a number', actual, expected);
-				return matcherResult;
-			}
-			if (matcherResult.pass) {
-				matcherResult.message = ss.formatString('Expected {0} not to be divisble by {1}', actual, expected);
-			}
-			else {
-				matcherResult.message = ss.formatString('Expected {0} to be divisble by {1}', actual, expected);
-			}
-			return matcherResult;
-		}
-	});
-	ss.initClass($JasmineTests$ToBeGoofy, $asm, {
-		compare: function(actual, expected) {
-			if (ss.referenceEquals(expected, ss.cast(undefined, String))) {
-				expected = '';
-			}
-			var resultPass = false;
-			var resultMessage = '';
-			resultPass = $JasmineTests$ToBeGoofy.Util.equals(actual['hyuk'], 'gawrsh' + expected, $JasmineTests$ToBeGoofy.CustomEqualityTesters);
-			if (resultPass) {
-				resultMessage = ss.formatString('Expected {0} not to be quite so goofy', actual);
-			}
-			else {
-				resultMessage = ss.formatString('Expected {0} to be goofy, but it was not very goofy', actual);
-			}
-			return new $JasmineTests$MatcherResult(resultPass, resultMessage);
-		}
-	});
 	ss.initClass($MatcherExtensions, $asm, {});
 	ss.initClass($newReporter, $asm, {
 		jasmineStarted: function(suiteInfo) {
@@ -793,8 +886,30 @@
 			console.log('Finished suite');
 		}
 	});
-	$JasmineTests$ToBeGoofy.Util = null;
-	$JasmineTests$ToBeGoofy.CustomEqualityTesters = null;
-	$JasmineTests$ToBeDivisibleBy.Util = null;
-	$JasmineTests$ToBeDivisibleBy.CustomEqualityTesters = null;
+	$JasmineTests$CustomMatchers.ToBeGoofy = function(utils, customEqualityTesters, actual, expected) {
+		if (ss.isNullOrUndefined(expected)) {
+			expected = '';
+		}
+		var resultPass = utils.equals(actual['hyuk'], 'gawrsh' + expected, customEqualityTesters);
+		var resultMessage = ss.formatString((resultPass ? 'Expected {0} not to be quite so goofy' : 'Expected {0} to be goofy, but it was not very goofy'), actual);
+		return new $JasmineTests$MatcherResult(resultPass, resultMessage);
+	};
+	$JasmineTests$CustomMatchers.ToBeDivisibleBy = function(utils, customEqualityTesters, actual, expected) {
+		var matcherResult = new $JasmineTests$MatcherResult(false, '');
+		var expectedConvert = ss.safeCast(expected, ss.Int32);
+		if (ss.isNullOrUndefined(expectedConvert)) {
+			matcherResult.message = ss.formatString('Expected value ({0}) was not an integer', expected);
+			return matcherResult;
+		}
+		var actualConvert = ss.safeCast(actual, ss.Int32);
+		if (ss.isValue(actualConvert)) {
+			matcherResult.pass = ss.unbox(actualConvert) % ss.unbox(expectedConvert) === 0;
+		}
+		else {
+			matcherResult.message = ss.formatString('Expected {0} to be divisble by {1}, but it was not a number', actual, expected);
+			return matcherResult;
+		}
+		matcherResult.message = ss.formatString((matcherResult.pass ? 'Expected {0} not to be divisble by {1}' : 'Expected {0} to be divisble by {1}'), actual, expected);
+		return matcherResult;
+	};
 })();
