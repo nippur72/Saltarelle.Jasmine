@@ -94,5 +94,6 @@ Build your solution and browse to the runner page (`SpecRunner.html`), Jasmine w
 
 ## History <a id="history"></a>
 
+* March 4, 2015: support for explicit timeout parameter in async (Jasmine v2.2) 
 * March 2, 2015: updated to Jasmine v2.1.3 (thanks to [Bruddles](https://github.com/Bruddles)) 
 * (around 2013): implemented Jasmine v1
