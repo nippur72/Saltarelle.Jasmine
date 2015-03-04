@@ -131,9 +131,6 @@ namespace Jasmine
         [InlineCode("it({desc},{func})")]
         public static void it(string desc, Action func) { }
 
-        [InlineCode("it({desc},{func},{timeout})")]
-        public static void it(string desc, Action func, int timeout) { }
-
         [InlineCode("it({desc},{func})")]
         public static void it(string desc, Action<Action> func) { }
 
@@ -149,9 +146,6 @@ namespace Jasmine
         [InlineCode("fit({desc},{func})")]
         public static void fit(string desc, Action func) { }
 
-        [InlineCode("fit({desc},{func},{timeout})")]
-        public static void fit(string desc, Action func, int timeout) { }
-
         [InlineCode("fit({desc},{func})")]
         public static void fit(string desc, Action<Action> func) { }
 
@@ -166,9 +160,6 @@ namespace Jasmine
 
         [InlineCode("xit({desc},{func})")]
         public static void xit(string desc, Action func) { }
-
-        [InlineCode("xit({desc},{func},{timeout})")]
-        public static void xit(string desc, Action func, int timeout) { }
 
         [InlineCode("xit({desc},{func})")]
         public static void xit(string desc, Action<Action> func) { }
@@ -197,9 +188,6 @@ namespace Jasmine
         [InlineCode("beforeEach({func})")]
         public static void beforeEach(Action func) { }
 
-        [InlineCode("beforeEach({func},{timeout})")]
-        public static void beforeEach(Action func, int timeout) { }
-
         [InlineCode("beforeEach({func})")]
         public static void beforeEach(Action<Action> func) { }
 
@@ -214,9 +202,6 @@ namespace Jasmine
 
         [InlineCode("afterEach({func})")]
         public static void afterEach(Action func) { }
-
-        [InlineCode("afterEach({func},{timeout})")]
-        public static void afterEach(Action func, int timeout) { }
 
         [InlineCode("afterEach({func})")]
         public static void afterEach(Action<Action> func) { }
@@ -233,9 +218,6 @@ namespace Jasmine
         [InlineCode("beforeAll({func})")]
         public static void beforeAll(Action func) { }
 
-        [InlineCode("beforeAll({func},{timeout})")]
-        public static void beforeAll(Action func, int timeout) { }
-
         [InlineCode("beforeAll({func})")]
         public static void beforeAll(Action<Action> func) { }
 
@@ -250,9 +232,6 @@ namespace Jasmine
 
         [InlineCode("afterAll({func})")]
         public static void afterAll(Action func) { }
-
-        [InlineCode("afterAll({func},{timeout})")]
-        public static void afterAll(Action func, int timeout) { }
 
         [InlineCode("afterAll({func})")]
         public static void afterAll(Action<Action> func) { }
