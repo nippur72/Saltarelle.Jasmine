@@ -628,6 +628,19 @@
 						jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
 					});
 				});
+				describe('long asynchronous specs with explicit timeout parameter', function() {
+					beforeEach(function(done3) {
+						done3();
+					}, 1000);
+					it('takes a long time', function(done4) {
+						window.setTimeout(function() {
+							done4();
+						}, 900);
+					});
+					afterEach(function(done5) {
+						done5();
+					}, 1000);
+				});
 			});
 			var customMatchers = {};
 			customMatchers['toBeGoofy'] = function(util, customEqualityTesters) {
