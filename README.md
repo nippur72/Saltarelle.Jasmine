@@ -91,6 +91,64 @@ public class JasmineTests : JasmineSuite
 
 Build your solution and browse to the runner page (`SpecRunner.html`), Jasmine will do the rest.
 
+## Creating custom matchers
+
+There are two methods available for registering custom matchers - `JasmineSuite.addMatcher(string name, CustomMatcherComparer matcher)` and 
+`JasmineSuite.addMatchers(JsDictionary<string, CustomMatcherComparer> matchers)`.  As in Javascript, these methods should be called in a
+ `beforeEach` block to register your matcher(s) before each test is run, though the signatures of these methods differ significantly
+from the corresponding Javascript method.
+
+Defining and registering a `CustomMatcherComparer` looks something like this:
+
+```C#
+public class JasmineTests : JasmineSuite
+{
+    // Basic implementation of IMatcherResult
+    public class MatcherResult: IMatcherResult {
+        public bool Pass;
+        public string Message;
+
+        public MatcherResult(bool pass, string message)
+        {
+            Pass = pass;
+            Message = message;
+        }
+    }
+
+    public class CustomMatchers {
+        public static CustomMatcherComparer ToBeEven = (utils, customEqualityTesters, actual, expected) => {
+            var result = new MatcherResult(false, "Expected number to be even");
+
+            // ...implement matcher logic here as you would in Javascript, utilising utils and customEqualityTesters as required.
+
+            return result;
+        };
+    }
+    
+	public void SpecRunner1()
+	{
+		beforEach(() => {
+            addMatcher("toBeEven", CustomMatchers.ToBeEven);
+        });
+        
+        // ...the rest of your tests that make use of the custom matcher(s)
+	}
+}
+```
+
+You will also need to define an extension method on the `Jasmine.Matchers` type to allow usage of your custom matchers from C# code, for example:
+
+```C#
+public static class MatcherExtensions
+{
+    [InstanceMethodOnFirstArgument]
+	public static bool ToBeEven(this Matchers matcher, int expected)
+	{
+		return false;
+	}
+}
+```
+
 
 ## History <a id="history"></a>
 

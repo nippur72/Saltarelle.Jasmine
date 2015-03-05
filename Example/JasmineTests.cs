@@ -1,11 +1,8 @@
 ﻿using System;
-
-using System.Html;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Html;
 using System.Runtime.CompilerServices;
-using System.Serialization;
 using System.Threading.Tasks;
 using Jasmine;
 
@@ -902,8 +899,8 @@ public class JasmineTests : JasmineSuite
         {
             it("matches any value", () =>
             {
-                expect(null).toEqual(any(typeof(Object)));
-                expect(12).toEqual(any(typeof(Double)));
+                expect(null).toEqual(any(typeof(object)));
+                expect(12).toEqual(any(typeof(double)));
             });
 
             describe("when used with a spy", () =>
@@ -913,7 +910,7 @@ public class JasmineTests : JasmineSuite
                     Spy foo = createSpy("foo");
                     foo.Call(12, new Func<bool>(() => true));
 
-                    expect(foo).toHaveBeenCalledWith(any(typeof(Double)), any(typeof(Function)));
+                    expect(foo).toHaveBeenCalledWith(any(typeof(double)), any(typeof(Function)));
                 });
             });
         });
@@ -1144,11 +1141,6 @@ public class JasmineTests : JasmineSuite
          *
          */
 
-        /**
-         * This object has a custom matcher named "toBeGoofy".
-         */
-        JsDictionary<string, Func<ICustomMatcherUtil, object, ICustomMatcher>> customMatchers =
-            new JsDictionary<string, Func<ICustomMatcherUtil, object, ICustomMatcher>>();
 
         /**
         * ## Matcher Factories
@@ -1160,8 +1152,12 @@ public class JasmineTests : JasmineSuite
         /**
         * The factory method should return an object with a `compare` function that will be called to check the expectation.
         */
-        customMatchers["toBeGoofy"] = (util, customEqualityTesters) => new ToBeGoofy(util, customEqualityTesters);
-        customMatchers["toBeDivisibleBy"] = (util, customEqualityTesters) => new ToBeDivisibleBy(util, customEqualityTesters);
+
+        /**
+         * This object has a custom matcher named "toBeGoofy".
+         */
+        JsDictionary<string, CustomMatcherComparer> customMatchers = new JsDictionary<string, CustomMatcherComparer>();
+        customMatchers["toBeGoofy"] = CustomMatchers.ToBeGoofy;
 
 
         /**
@@ -1215,7 +1211,7 @@ public class JasmineTests : JasmineSuite
         {
             beforeEach(() =>
             {
-                addMatchers(customMatchers);
+                addMatcher("toBeDivisibleBy", CustomMatchers.ToBeDivisibleBy);
             });
 
             it("is available on an expectation", () =>
@@ -1318,10 +1314,53 @@ public class JasmineTests : JasmineSuite
             });
         });
 
-        /**
-         Focusing specs will make it so that they are the only specs that run.
-         */
+        describe("Publicly exposed classes", () =>
+        {
+            it("can instantiate publicly exposed jasmine classes", () =>
+            {
+                expect(new Action(() =>
+                {
+                    Any a = new Any(typeof(Object));
+                    Spy s = new Spy("mySpy");
+                    Spy s2 = new Spy();
+                    Suite suite = new Suite(new {});
+                    CallTracker ct = new CallTracker();
+                    Clock c = new Clock(new object{}, new {}, null);
+                    ObjectContaining oc = new ObjectContaining(new {propA = 5});
+                    Spec spec = new Spec(new { queueableFn = new {} });
+                    Env e = new Env(new object{});
+                    SpyStrategy sc = new SpyStrategy(new {});
+                })).not.toThrow();
+            });
 
+            it("can extend publicly exposed jasmine classes", () =>
+            {
+                expect(new Action(() =>
+                {
+                    AnyPlus ap = new AnyPlus(typeof(String));
+                    ap.Test();
+                    ClockPlus cp = new ClockPlus(new object{}, new object{}, null);
+                    cp.Test();
+                    ObjectContainingPlus ocp = new ObjectContainingPlus(new object{});
+                    ocp.Test();
+                    SuitePlus sp = new SuitePlus(new { });
+                    sp.Test();
+                    SpecPlus spp = new SpecPlus(new { queueableFn = new { } });
+                    spp.Test();
+                    EnvPlus ep = new EnvPlus(new { });
+                    ep.Test();
+                    CallTrackerPlus ctp = new CallTrackerPlus();
+                    ctp.Test();
+                    SpyStrategyPlus ssp = new SpyStrategyPlus(new { });
+                    ssp.Test();
+                })).not.toThrow();
+            });
+        });
+
+        /**
+         * Focusing specs will make it so that they are the only specs that run.
+         * NOTE: These tests have to be commented out so the rest of the tests actually run!
+         */
         //describe("Focused specs", () => {
 
         //    /** Any spec declared with `fit` is focused.
@@ -1363,111 +1402,178 @@ public class JasmineTests : JasmineSuite
 
     }
 
-    public class ToBeGoofy : ICustomMatcher<string>
+    //#region Extended Classes
+    private class AnyPlus : Any
     {
-        public static ICustomMatcherUtil Util;
-        public static object CustomEqualityTesters;
-
-        public ToBeGoofy(ICustomMatcherUtil util, object customEqualityTesters)
+        public AnyPlus(object expectedObject) : base(expectedObject)
         {
-            ToBeGoofy.Util = util;
-            ToBeGoofy.CustomEqualityTesters = customEqualityTesters;
         }
 
+        public bool Test()
+        {
+            return false;
+        }
+    }
+
+    private class ClockPlus : Clock
+    {
+        public ClockPlus(object global, object delayedFunctionScheduler, Clock mockDate)
+            : base(global, delayedFunctionScheduler, mockDate)
+        {
+        }
+
+        public bool Test()
+        {
+            return false;
+        }
+    }
+
+    private class ObjectContainingPlus : ObjectContaining
+    {
+        public ObjectContainingPlus(object sample)
+            : base(sample)
+        {
+        }
+
+        public bool Test()
+        {
+            return false;
+        }
+    }
+    
+    private class SuitePlus : Suite
+    {
+        public SuitePlus(object attrs)
+            : base(attrs)
+        {
+        }
+
+        public bool Test()
+        {
+            return false;
+        }
+    }
+
+    private class SpecPlus : Spec
+    {
+        public SpecPlus(object attrs)
+            : base(attrs)
+        {
+        }
+
+        public bool Test()
+        {
+            return false;
+        }
+    }
+
+    private class EnvPlus : Env
+    {
+        public EnvPlus(object options)
+            : base(options)
+        {
+        }
+
+        public bool Test()
+        {
+            return false;
+        }
+    }
+
+    private class CallTrackerPlus : CallTracker
+    {
+        public CallTrackerPlus()
+            : base()
+        {
+        }
+
+        public bool Test()
+        {
+            return false;
+        }
+    }
+
+    private class SpyStrategyPlus : SpyStrategy
+    {
+        public SpyStrategyPlus(object options)
+            : base(options)
+        {
+        }
+        
+        public bool Test()
+        {
+            return false;
+        }
+    }
+    //#endregion Extended Classes
+
+    public class CustomMatchers
+    {
         /**
         * ## A Function to `compare`
         *
         * The compare function receives the value passed to `expect()` as the first argument - the actual - and the value (if any) passed to the matcher itself as second argument.
         */
-        public IMatcherResult compare(object actual, string expected)
+        public static CustomMatcherComparer ToBeGoofy = (utils, customEqualityTesters, actual, expected) =>
         {
-
             /**
-                * `toBeGoofy` takes an optional `expected` argument, so define it here if not passed in.
-                */
-            if (expected == (string)Script.Undefined)
+            * `toBeGoofy` takes an optional `expected` argument, so define it here if not passed in.
+            */
+            if (expected == null)
             {
                 expected = "";
             }
-            
+
             /**
             * ### Result
             *
             * The `compare` function must return a result object with a `pass` property that is a boolean result of the matcher. The `pass` property tells the expectation whether the matcher was successful (`true`) or unsuccessful (`false`). If the expectation is called/chained with `.not`, the expectation will negate this to determine whether the expectation is met.
             */
-            bool resultPass = false;
-            string resultMessage = "";
             /**
             * `toBeGoofy` tests for equality of the actual's `hyuk` property to see if it matches the expectation.
             */
-            resultPass = ToBeGoofy.Util.equals(((JsDictionary)actual)["hyuk"], "gawrsh" + expected, ToBeGoofy.CustomEqualityTesters);
+            bool resultPass = utils.@equals(((JsDictionary)actual)["hyuk"], "gawrsh" + expected, customEqualityTesters);
 
             /**
             * ### Failure Messages
             *
             * If left `undefined`, the expectation will attempt to craft a failure message for the matcher. However, if the return value has a `message` property it will be used for a  failed expectation.
             */
-            if (resultPass)
-            {
-                /**
-                * The matcher succeeded, so the custom failure message should be present in the case of a negative expectation - when the expectation is used with `.not`.
-                */
-                resultMessage = String.Format("Expected {0} not to be quite so goofy", actual);
-            }
-            else
-            {
-                /**
-                * The matcher failed, so the custom failure message should be present in the case of a positive expectation
-                */
-                resultMessage = String.Format("Expected {0} to be goofy, but it was not very goofy", actual);
-            }
+            string resultMessage = string.Format(resultPass ? "Expected {0} not to be quite so goofy" : "Expected {0} to be goofy, but it was not very goofy", actual);
 
             /**
             * Return the result of the comparison.
             */
             return new MatcherResult(resultPass, resultMessage);
-        }
-    }
+        };
 
-    public class ToBeDivisibleBy : ICustomMatcher<int>
-    {
-        public static ICustomMatcherUtil Util;
-        public static object CustomEqualityTesters;
-
-        public ToBeDivisibleBy(ICustomMatcherUtil util, object customEqualityTesters)
+        public static CustomMatcherComparer ToBeDivisibleBy = (utils, customEqualityTesters, actual, expected) =>
         {
-            ToBeDivisibleBy.Util = util;
-            ToBeDivisibleBy.CustomEqualityTesters = customEqualityTesters;
-        }
+            var matcherResult = new MatcherResult(false, "");
 
-        public IMatcherResult compare(object actual, int expected)
-        {
-            bool resultPass = false;
-            string resultMessage = "";
-            var matcherResult = new MatcherResult(resultPass, resultMessage);
+            int? expectedConvert = expected as int?;
+            if (expectedConvert == null)
+            {
+                matcherResult.Message = string.Format("Expected value ({0}) was not an integer", expected);
+                return matcherResult;
+            }
 
             int? actualConvert = actual as int?;
             if (actualConvert != null)
             {
-                matcherResult.Pass = actualConvert.Value % expected == 0;
+                matcherResult.Pass = actualConvert.Value % expectedConvert.Value == 0;
             }
             else
             {
-                matcherResult.Message = String.Format("Expected {0} to be divisble by {1}, but it was not a number", actual, expected);
+                matcherResult.Message = string.Format("Expected {0} to be divisble by {1}, but it was not a number", actual,
+                    expected);
                 return matcherResult;
             }
 
-            if (matcherResult.Pass)
-            {
-                matcherResult.Message = String.Format("Expected {0} not to be divisble by {1}", actual, expected);
-            }
-            else
-            {
-                matcherResult.Message = String.Format("Expected {0} to be divisble by {1}", actual, expected);
-            }
+            matcherResult.Message = string.Format(matcherResult.Pass ? "Expected {0} not to be divisble by {1}" : "Expected {0} to be divisble by {1}", actual, expected);
 
             return matcherResult;
-        }
+        };
     }
 
     [PreserveMemberCase(false)]
