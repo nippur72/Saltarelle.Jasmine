@@ -145,8 +145,14 @@ namespace Jasmine
         [InlineCode("it({desc},{func})")]
         public static void it(string desc, Action<Action> func) { }
 
+        [InlineCode("it({desc},{func},{timeout})")]
+        public static void it(string desc, Action<Action> func, int timeout) { }
+
         [InlineCode("it({desc}, ss.mkdel(this, function(done) {{ {func}().continueWith(done); }}))")]
         public static void it(string desc, Func<Task> func) { }
+
+        [InlineCode("it({desc}, ss.mkdel(this, function(done) {{ {func}().continueWith(done); }}), {timeout})")]
+        public static void it(string desc, Func<Task> func, int timeout) { }
 
         [InlineCode("fit({desc},{func})")]
         public static void fit(string desc, Action func) { }
@@ -154,8 +160,14 @@ namespace Jasmine
         [InlineCode("fit({desc},{func})")]
         public static void fit(string desc, Action<Action> func) { }
 
+        [InlineCode("fit({desc},{func},{timeout})")]
+        public static void fit(string desc, Action<Action> func, int timeout) { }
+
         [InlineCode("fit({desc}, ss.mkdel(this, function(done) {{ {func}().continueWith(done); }}))")]
         public static void fit(string desc, Func<Task> func) { }
+
+        [InlineCode("fit({desc}, ss.mkdel(this, function(done) {{ {func}().continueWith(done); }}),{timeout})")]
+        public static void fit(string desc, Func<Task> func, int timeout) { }
 
         [InlineCode("iit({desc},{func})")]
         [Obsolete("Removed as of Jasmine 2.1")]
@@ -175,8 +187,14 @@ namespace Jasmine
         [InlineCode("xit({desc},{func})")]
         public static void xit(string desc, Action<Action> func) { }
 
+        [InlineCode("xit({desc},{func},{timeout})")]
+        public static void xit(string desc, Action<Action> func, int timeout) { }
+
         [InlineCode("xit({desc}, ss.mkdel(this, function(done) {{ {func}().continueWith(done); }}))")]
         public static void xit(string desc, Func<Task> func) { }
+
+        [InlineCode("xit({desc}, ss.mkdel(this, function(done) {{ {func}().continueWith(done); }}),{timeout})")]
+        public static void xit(string desc, Func<Task> func, int timeout) { }
 
         [InlineCode("pending()")]
         public static void pending() { }
@@ -196,8 +214,14 @@ namespace Jasmine
         [InlineCode("beforeEach({func})")]
         public static void beforeEach(Action<Action> func) { }
 
+        [InlineCode("beforeEach({func},{timeout})")]
+        public static void beforeEach(Action<Action> func, int timeout) { }
+
         [InlineCode("beforeEach(ss.mkdel(this, function(done) {{ {func}().continueWith(done); }}))")]
         public static void beforeEach(Func<Task> func) { }
+
+        [InlineCode("beforeEach(ss.mkdel(this, function(done) {{ {func}().continueWith(done); }}),{timeout})")]
+        public static void beforeEach(Func<Task> func, int timeout) { }
 
         [InlineCode("afterEach({func})")]
         public static void afterEach(Action func) { }
@@ -205,8 +229,14 @@ namespace Jasmine
         [InlineCode("afterEach({func})")]
         public static void afterEach(Action<Action> func) { }
 
+        [InlineCode("afterEach({func},{timeout})")]
+        public static void afterEach(Action<Action> func, int timeout) { }
+
         [InlineCode("afterEach(ss.mkdel(this, function(done) {{ {func}().continueWith(done); }}))")]
         public static void afterEach(Func<Task> func) { }
+
+        [InlineCode("afterEach(ss.mkdel(this, function(done) {{ {func}().continueWith(done); }}),{timeout})")]
+        public static void afterEach(Func<Task> func, int timeout) { }
 
         [InlineCode("beforeAll({func})")]
         public static void beforeAll(Action func) { }
@@ -214,8 +244,14 @@ namespace Jasmine
         [InlineCode("beforeAll({func})")]
         public static void beforeAll(Action<Action> func) { }
 
+        [InlineCode("beforeAll({func},{timeout})")]
+        public static void beforeAll(Action<Action> func, int timeout) { }
+
         [InlineCode("beforeAll(ss.mkdel(this, function(done) {{ {func}().continueWith(done); }}))")]
         public static void beforeAll(Func<Task> func) { }
+
+        [InlineCode("beforeAll(ss.mkdel(this, function(done) {{ {func}().continueWith(done); }}),{timeout})")]
+        public static void beforeAll(Func<Task> func, int timeout) { }
 
         [InlineCode("afterAll({func})")]
         public static void afterAll(Action func) { }
@@ -223,8 +259,14 @@ namespace Jasmine
         [InlineCode("afterAll({func})")]
         public static void afterAll(Action<Action> func) { }
 
+        [InlineCode("afterAll({func},{timeout})")]
+        public static void afterAll(Action<Action> func, int timeout) { }
+
         [InlineCode("afterAll(ss.mkdel(this, function(done) {{ {func}().continueWith(done); }}))")]
         public static void afterAll(Func<Task> func) { }
+
+        [InlineCode("afterAll(ss.mkdel(this, function(done) {{ {func}().continueWith(done); }}),{timeout})")]
+        public static void afterAll(Func<Task> func, int timeout) { }
 
         [InlineCode("spyOn({o},{methodname})")]
         public static Spy spyOn(object o, string methodname) { return null; }
@@ -254,6 +296,9 @@ namespace Jasmine
         // clock mock
 
         // async support
+        
+        /*
+        // runs, waits, waitsFor removed from Jasmine 2
         [InlineCode("runs({func})")]
         public static void runs(Action func) { }
 
@@ -265,6 +310,7 @@ namespace Jasmine
 
         [InlineCode("waitsFor({func})")]
         public static void waitsFor(Func<bool> func) { }
+        */
 
         [InlineCode("jasmine.clock()")]
         public static Clock clock()
