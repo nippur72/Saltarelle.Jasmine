@@ -1,6 +1,6 @@
 # Saltarelle.Jasmine
 
-Saltarelle.Jasmine is the metadata library required to use the [Jasmine](http://pivotal.github.io/jasmine/) BDD testing 
+Saltarelle.Jasmine is the metadata library required to use the [Jasmine](https://jasmine.github.io/) BDD testing 
 framework with the [C# Saltarelle compiler](http://www.saltarelle-compiler.com/).
 
 Currently the v2.1.3 of Jasmine is supported.
